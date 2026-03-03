@@ -1,4 +1,7 @@
+import "module-alias/register";
 import express, { Request, Response } from "express";
+import usersRouter from "./modules/users/users.router";
+import authRouter from "./modules/auth/auth.router";
 import dotenv from "dotenv";
 import { google } from "googleapis";
 
@@ -43,6 +46,11 @@ const listFiles = async (folderID: string) => {
 
     return fileRes.data.files ?? [];
 }
+
+app.use(express.json());
+
+app.use("/users", usersRouter);
+app.use("/auth", authRouter);
 app.get("/list-files", async (req: Request, res: Response) => {
 	if(!SHARED_DRIVE_ID){
         throw new Error("Shared Drive ID is required");
