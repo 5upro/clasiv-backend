@@ -34,3 +34,17 @@ export const login = async (req: Request, res: Response) => {
 		res.status(500).send("Error getting user");
 	}
 }
+
+export const loginVerification = async (req: Request, res: Response) => {
+    try {
+        const { email, otp } = req.body;
+        const { user, token } = await authService.loginVerification(email, otp);
+        res.status(201).json({ 
+			message: "Logged in successfully!" ,
+			user,
+			token
+		});
+    } catch (error) {
+        res.status(500).send("Error logging in!");
+    }
+}

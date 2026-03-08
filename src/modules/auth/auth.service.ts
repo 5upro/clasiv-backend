@@ -110,3 +110,55 @@ export const login = async (email: string) => {
 	await sendEmail(user.full_name, email, otp);
 	return;
 }
+
+export const loginVerification = async (email: string, otp: string) => {
+    const { data: otpData, error: otpErr } = await authRepository.getOtpStatus(email);
+    if(otpErr){
+        throw new Error(otpErr.message);
+    }
+    if(!otpData){
+        throw new Error("User not found");
+    }
+	if(otpData.otp_attempts > otpData.max_otp_attempts){
+        throw new Error("OTP limit exceeded");
+	}
+	if(otpData.created_at < otpData.expires_at){
+        throw new Error("OTP expired");
+	}
+
+	const isValid = verifyOTP(otp, otpData.hashed_otp);
+    if(!isValid){
+        await authRepository.updateOtpStatus(email, ++otpData.attempts, false);
+        throw new Error("Invalid OTP");
+    }
+
+    await authRepository.updateOtpStatus(email, ++otpData.attempts, true);
+	const { data: user, error: userError } = await authRepository.loginUser(email);
+    if(userError){
+        throw new Error(userError.message);
+    }
+    if(!user){
+        throw new Error("User not found");
+    }
+
+	await authRepository.deleteOtpStatus(email);
+	const refreshToken = jwt.sign(
+		{
+            id: user.id,
+            base_role: user.base_role
+		},
+		REFRESH_TOKEN_SECRET,
+		{expiresIn: "30d"}
+	);
+	const accessToken = jwt.sign(
+		{
+            id: user.id,
+			role: user.base_role,
+			role_extentions: [user.base_role]
+		},
+		ACCESS_TOKEN_SECRET,
+		{expiresIn: "30m"}
+	);
+
+    return {user, token: {accessToken, refreshToken}};
+}

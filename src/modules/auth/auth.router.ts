@@ -21,5 +21,10 @@ router.post("/login",
 	emailValidator, 
 	userController.login
 );
+router.post("/login/verification", 
+    emailValidator, 
+    otpValidator, 
+    userController.loginVerification
+);
 
 export default router;

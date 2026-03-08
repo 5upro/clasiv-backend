@@ -76,3 +76,10 @@ export const registerUser = async (roll_no: string, email: string) => {
         _email_id: email
 	})
 }
+
+export const loginUser = async (email: string) => {
+    return await supabase.rpc("login_user", {
+        _email_id: email
+    })
+}
+
