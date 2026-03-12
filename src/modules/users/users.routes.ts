@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { getMe } from "./users.controller";
-import { userAuth } from "../../middleware/user.auth";
+import * as userController from "@/modules/users/users.controller";
+import { userAuth } from "@/middleware/user.middleware";
 
 const router = Router();
 
-router.get("/me", userAuth, getMe);
+router.use(userAuth);
+
+router.get("/me", userController.getMe);
 
 export default router;
