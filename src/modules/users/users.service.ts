@@ -1,12 +1,12 @@
-import * as userRepository from "./users.repository";
+import * as userRepository from "@/modules/users/users.repository";
 
 export const verifyUserById = async (id: string) => {
-	const { data, error } = await userRepository.getUserById(id);
-	if(error){
-        throw new Error(error.message);
+	const { data: user, error: userErr } = await userRepository.getUserById(id);
+	if(userErr){
+        throw new Error(userErr.message);
 	}
-	if(!data){
+	if(!user){
         throw new Error("User not found");
 	}
-    return data;
+    return user;
 };
