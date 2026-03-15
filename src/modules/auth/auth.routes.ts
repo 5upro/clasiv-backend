@@ -22,6 +22,7 @@ router.post("/otp/verification",
 	otpValidator, 
 	authController.otpVerification
 );
+router.post("/otp/resend", authController.resendOtp);
 router.post("/refresh", 
 	authController.refreshTokens
 );

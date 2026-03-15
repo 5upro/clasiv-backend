@@ -1,4 +1,10 @@
 import { 
+	OtpPayload, 
+	OtpSession, 
+	UpdateOtpSession, 
+	UpdateOtpSessionSchema 
+} from "@/types/auth";
+import { 
 	User 
 } from "@/types/users";
 import { 
@@ -9,16 +15,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL as string;
+const SUPABASE_KEY = process.env.SUPABASE_KEY as string;
 
 if(!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error("Missing Supabase credentials");
 }
 
 const supabase = createClient(
-    SUPABASE_URL as string,
-    SUPABASE_KEY as string
+    SUPABASE_URL,
+    SUPABASE_KEY
 );
 
 export const getUserById = async (id: string): Promise<PostgrestSingleResponse<User>> => {
@@ -43,45 +49,49 @@ export const getUserByRoll = async (roll_no: string) => {
 		.single();
 }
 
-export const setOtpStatus = async (id: number, email: string, otpHash: string) => {
+export const setOtpStatus = async (otp: OtpPayload): Promise<PostgrestSingleResponse<OtpSession>> => {
     return await supabase
         .from("otp_sessions")
         .insert({
-			user_id: id,
-			email_id: email,
-            otp_hash: otpHash,
+			user_id: otp.id,
+			email_id: otp.email,
+            otp_hash: otp.value,
+			purpose: otp.type
 		})
 		.select()
 		.single();
 }
 
-export const updateOtpStatus = async (otp_id: string, attempts: number, status: string) => {
+export const updateOtpStatus = async (session_Id: string, updates: UpdateOtpSession): Promise<PostgrestSingleResponse<OtpSession>> => {
+    const parsedUpdates = UpdateOtpSessionSchema.parse(updates);
     return await supabase
         .from("otp_sessions")
-        .update({ 
-            otp_attempts: attempts,
-            status: status
+        .update({
+			...parsedUpdates,
+            updated_at: new Date(),
 		})
-        .eq("id", otp_id);
+        .eq("id", session_Id)
+		.select()
+		.single();
 }
 
-export const getOtpStatus = async (otp_id: string) => {
+export const getOtpStatus = async (session_Id: string): Promise<PostgrestSingleResponse<OtpSession>> => {
     return await supabase
         .from("otp_sessions")
         .select("*")
-        .eq("id", otp_id)
+        .eq("id", session_Id)
         .single();
 }
 
-export const deleteOtpStatus = async (otp_id: string) => {
+export const deleteOtpStatus = async (session_Id: string) => {
     return await supabase
         .from("otp_sessions")
         .delete()
-        .eq("id", otp_id);
+        .eq("id", session_Id);
 }
 
 export const registerUser = async (user_id: string, email: string): Promise<PostgrestSingleResponse<User>> => {
-    return await supabase.rpc("register_student_user", {
+    return await supabase.rpc("register_user", {
 		_user_id: user_id,
         _email_id: email
 	}).single();

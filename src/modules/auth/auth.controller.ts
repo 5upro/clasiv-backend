@@ -34,7 +34,7 @@ export const otpVerification = async (req: Request, res: Response) => {
         const { session_Id, email, otp, verification_type } = req.body;
         const { user, tokens } = await authService.otpVerification({
 			id: session_Id, 
-			email, 
+			email: email, 
 			value: otp, 
 			type: verification_type
 		});
@@ -46,6 +46,20 @@ export const otpVerification = async (req: Request, res: Response) => {
     } catch (error) {
 		if(error instanceof Error)
 			res.status(500).send(error.message);
+    }
+}
+
+export const resendOtp = async (req: Request, res: Response) => {
+    try {
+        const { session_Id, full_name } = req.body;
+        const sessionId = await authService.resendOtp(session_Id, full_name);
+        res.status(201).json({ 
+            message: "OTP sent!",
+            sessionId
+        });
+    } catch (error) {
+        if(error instanceof Error)
+            res.status(500).send(error.message);
     }
 }
 
