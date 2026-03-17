@@ -1,0 +1,127 @@
+:root {
+    --primary-color: 220 20 60;
+	--accent-color: 12 12 12;
+    --secondary-color: 200 200 200;
+	--title-min-size: 1.5rem;
+	--title-max-size: 2.5rem;
+	--status-code-min-size: 8rem;
+	--status-code-max-size: 10rem;
+	--status-text-min-size: 4rem;
+	--status-text-max-size: 6.25rem;
+    --status-desc-min-size: 1rem;
+    --status-desc-max-size: 2rem;
+}
+
+* {
+	padding: 0;
+    margin: 0;
+}
+
+body {
+	height: 100vh;
+	width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+	gap: 2rem;
+	box-sizing: border-box;
+    font-family: "Segoe UI", "Roboto", "Oxygen", "Ubuntu", sans-serif;
+	background: 
+        linear-gradient(
+            -60deg, 
+            transparent 35%, 
+            rgb(var(--primary-color)/0.2)
+		),
+        linear-gradient(
+            60deg, 
+            transparent 25%, 
+            rgb(var(--secondary-color)/0.15)
+		),
+		linear-gradient(
+            45deg, 
+            rgb(var(--accent-color)), 
+            rgb(var(--accent-color))
+		);
+	padding: 20px;
+}
+
+.header {
+	width: 100%;
+	display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.title {
+    font-size: 2.5rem;
+	line-height: 2.5rem;
+    color: rgb(var(--primary-color));
+}
+
+.message {
+	height: 100%;
+	width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.statusMessage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.status {
+    display: flex;
+	flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.statusCode {
+    font-size: clamp(
+		var(--status-code-min-size), 
+		10vw,  
+		var(--status-code-max-size)
+	);
+    line-height: clamp(
+		var(--status-code-min-size), 
+		10vw,  
+		var(--status-code-max-size)
+	);
+	color: rgb(var(--primary-color)/0.6);
+}
+
+.statusText {
+    font-size: clamp(
+		var(--status-text-min-size), 
+		6vw, 
+		var(--status-text-max-size)
+	);
+    line-height: clamp(
+		var(--status-text-min-size), 
+		6vw, 
+		var(--status-text-max-size)
+	);   
+	color: rgb(var(--secondary-color));
+}
+
+.description {
+    font-size: clamp(
+		var(--status-desc-min-size), 
+		2vw, 
+		var(--status-desc-max-size)
+	);
+    line-height: clamp(
+		var(--status-desc-min-size), 
+		2vw, 
+		var(--status-desc-max-size)
+	);   
+	color: gray;
+	text-align: center;
+}

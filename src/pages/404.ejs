@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><%= title || "Not Found" %></title>
+		<link rel="stylesheet" href="/404.css">
+	</head>
+	<body>
+		<div class="header">
+			<h1 class="title"><%= appName || "Clasiv" %></h1>
+		</div>
+
+		<div class="message">
+			<div class="statusMessage">
+				<div class="status">
+					<h1 class="statusCode"><%= statusCode || 404 %></h1>
+					<h2 class="statusText"><%= statusText || "Not Found" %></h2>
+				</div>
+
+				<p class="description">
+					<%= description || "Sorry, but the page you are looking for was not found." %>
+				</p>
+			</div>
+		</div>
+	</body>
+</html>
