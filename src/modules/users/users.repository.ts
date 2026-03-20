@@ -1,6 +1,8 @@
 import { 
 	CreateUser, 
+	Role, 
 	RoleMap, 
+	UpdateUser, 
 	User 
 } from "@/types/users";
 import { 
@@ -23,18 +25,10 @@ const supabase = createClient(
 	SUPABASE_KEY
 );
 
-export const getRoleMap = async (): Promise<RoleMap> => {
-	const { data, error } = await supabase
+export const getRoles = async (): Promise<PostgrestSingleResponse<Role[]>> => {
+	return await supabase
 		.from("roles")
-		.select("role_id, role_name");
-
-	if (error) {
-		throw new Error(error.message);
-	}
-
-	return Object.fromEntries(
-		data.map((r) => [r.role_name, r.role_id])
-	);
+		.select("role_id, role_name")
 }
 
 export const getUserById = async (
@@ -56,12 +50,14 @@ export const getUsers = async (
 }
 
 export const createUser = async (
-	user: CreateUser
+	user: CreateUser,
+	roleMap: RoleMap,
 ): Promise<PostgrestSingleResponse<User>> => {
-	const roleMap = await getRoleMap();
 	return await supabase.rpc("create_user", {
 		_full_name: user.full_name,
-		_base_role: roleMap[user.base_role],
+		_base_role: user.base_role 
+			? roleMap[user.base_role]
+            : null,
 
 		_extended_roles: user.extended_roles
 			? user.extended_roles.map((r) => roleMap[r])
@@ -77,4 +73,30 @@ export const createUser = async (
 
 		_teacher_abbrv: user.base_role === "teacher" ? user.teacher_abbrv : null,
 	});
+}
+
+export const updateUser = async (
+    user: UpdateUser,
+    roleMap: RoleMap,
+): Promise<PostgrestSingleResponse<User>> => {
+    return await supabase.rpc("update_user", {
+        _user_id: user.id,
+        _full_name: user.full_name,
+        _base_role: user.base_role
+			? roleMap[user.base_role]
+            : null,
+        _extended_roles: user.extended_roles
+            ? user.extended_roles.map((r) => roleMap[r]).filter((r) => r !== null)
+            : null,
+        _email_id: user.email_id ?? null,
+        _phone_no: user.phone_no ?? null,
+
+        _roll_no: user.base_role === "student" ? user.roll_no : null,
+        _reg_no: user.base_role === "student" ? user.reg_no : null,
+        _semester_id: user.base_role === "student" ? user.semester : null,
+        _dob: user.base_role === "student" ? user.dob : null,
+        _department_id: user.department_id ?? null,
+        
+		_teacher_abbrv: user.base_role === "teacher" ? user.teacher_abbrv : null,
+    });
 }

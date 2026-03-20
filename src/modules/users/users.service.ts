@@ -1,8 +1,17 @@
 import * as userRepository from "@/modules/users/users.repository";
-import { CreateUser, User } from "@/types/users";
+import { CreateUser, RoleMap, UpdateUser } from "@/types/users";
 
 export const createUser = async (user: CreateUser) => {
-    const { data: createdUser, error: userErr } = await userRepository.createUser(user);
+	const { data: roles, error: rolesErr } = await userRepository.getRoles();
+	if(rolesErr){
+		throw new Error(rolesErr.message);
+	}
+	const roleMap = roles.reduce((acc, r) => {
+		acc[r.role_name as keyof RoleMap] = r.role_id;
+		return acc;
+	}, {} as RoleMap);
+
+    const { data: createdUser, error: userErr } = await userRepository.createUser(user, roleMap);
     if(userErr){
         throw new Error(userErr.message);
     }
@@ -23,6 +32,26 @@ export const getUsers = async (page: number, limit: number) => {
         throw new Error("Users not found");
     }
     return users;
+};
+
+export const updateUser = async (user: UpdateUser) => {
+	const { data: roles, error: rolesErr } = await userRepository.getRoles();
+	if(rolesErr){
+		throw new Error(rolesErr.message);
+	}
+	const roleMap = roles.reduce((acc, r) => {
+		acc[r.role_name as keyof RoleMap] = r.role_id;
+		return acc;
+	}, {} as RoleMap);
+
+    const { data: updatedUser, error: userErr } = await userRepository.updateUser(user, roleMap);
+    if(userErr){
+        throw new Error(userErr.message);
+    }
+    if(!updatedUser){
+        throw new Error("User not found");
+    }
+    return updatedUser;
 };
 
 export const getMe = async (id: string) => {
