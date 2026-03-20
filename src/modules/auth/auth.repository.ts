@@ -1,6 +1,7 @@
 import { 
 	OtpPayload, 
 	OtpSession, 
+	OtpSessionWithUser, 
 	UpdateOtpSession, 
 	UpdateOtpSessionSchema 
 } from "@/types/auth";
@@ -49,11 +50,13 @@ export const getUserByRoll = async (roll_no: string) => {
 		.single();
 }
 
-export const setOtpStatus = async (otp: OtpPayload): Promise<PostgrestSingleResponse<OtpSession>> => {
+export const setOtpStatus = async (
+	otp: OtpPayload
+): Promise<PostgrestSingleResponse<OtpSession>> => {
     return await supabase
         .from("otp_sessions")
         .insert({
-			user_id: otp.id,
+			user_id: otp.session_id,
 			email_id: otp.email,
             otp_hash: otp.value,
 			purpose: otp.type
@@ -62,7 +65,10 @@ export const setOtpStatus = async (otp: OtpPayload): Promise<PostgrestSingleResp
 		.single();
 }
 
-export const updateOtpStatus = async (session_Id: string, updates: UpdateOtpSession): Promise<PostgrestSingleResponse<OtpSession>> => {
+export const updateOtpStatus = async (
+	session_id: string,
+	updates: UpdateOtpSession
+): Promise<PostgrestSingleResponse<OtpSession>> => {
     const parsedUpdates = UpdateOtpSessionSchema.parse(updates);
     return await supabase
         .from("otp_sessions")
@@ -70,34 +76,41 @@ export const updateOtpStatus = async (session_Id: string, updates: UpdateOtpSess
 			...parsedUpdates,
             updated_at: new Date(),
 		})
-        .eq("id", session_Id)
+        .eq("id", session_id)
 		.select()
 		.single();
 }
 
-export const getOtpStatus = async (session_Id: string): Promise<PostgrestSingleResponse<OtpSession>> => {
+export const getOtpStatus = async (
+	session_id: string
+): Promise<PostgrestSingleResponse<OtpSessionWithUser>> => {
     return await supabase
         .from("otp_sessions")
-        .select("*")
-        .eq("id", session_Id)
+        .select("*, users!inner(full_name)")
+        .eq("id", session_id)
         .single();
 }
 
-export const deleteOtpStatus = async (session_Id: string) => {
+export const deleteOtpStatus = async (session_id: string) => {
     return await supabase
         .from("otp_sessions")
         .delete()
-        .eq("id", session_Id);
+        .eq("id", session_id);
 }
 
-export const registerUser = async (user_id: string, email: string): Promise<PostgrestSingleResponse<User>> => {
+export const registerUser = async (
+	user_id: string, 
+	email: string
+): Promise<PostgrestSingleResponse<User>> => {
     return await supabase.rpc("register_user", {
 		_user_id: user_id,
         _email_id: email
 	}).single();
 }
 
-export const loginUser = async (user_id: string): Promise<PostgrestSingleResponse<User>> => {
+export const loginUser = async (
+	user_id: string
+): Promise<PostgrestSingleResponse<User>> => {
     return await supabase.rpc("login_user", {
 		_user_id: user_id,
     }).single();
