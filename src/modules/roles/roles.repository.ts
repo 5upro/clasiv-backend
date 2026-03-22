@@ -2,7 +2,7 @@ import {
 	createClient, 
 	PostgrestSingleResponse 
 } from "@supabase/supabase-js";
-import { Role } from "@/types/roles";
+import { CreateRole, Role } from "@/types/roles";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,4 +23,12 @@ export const getRoles = async (): Promise<PostgrestSingleResponse<Role[]>> => {
     return await supabase
         .from("roles")
         .select("*");
+}
+
+export const createRole = async (role: CreateRole): Promise<PostgrestSingleResponse<Role>> => {
+    return await supabase
+        .from("roles")
+        .insert(role)
+        .select("*")
+        .single();
 }
