@@ -22,10 +22,6 @@ router.get("/",
 	paginationValidator,
 	userController.getUsers
 );
-router.patch("/",
-	validator(UpdateUserSchema),
-	userController.updateUser
-);
 router.delete("/", 
     validator(DeleteUserSchema),
 	userController.deleteUser
@@ -39,6 +35,10 @@ router.patch("/me",
 );
 router.get("/:id", 
     userController.getUser
+);
+router.patch("/:id", 
+    validator(UpdateUserSchema),
+    userController.updateUser
 );
 
 export default router;

@@ -25,19 +25,6 @@ export const getUsers = async (req: Request, res: Response) => {
 	}
 }
 
-export const updateUser = async (req: Request, res: Response) => {
-    try {
-        const user = await userService.updateUser(req.body);
-        res.status(200).json({
-            message: "User updated successfully!", 
-            user: user
-        });
-    } catch (error) {
-        if(error instanceof Error)
-            res.status(500).send(error.message);
-    }
-}
-
 export const deleteUser = async (req: Request, res: Response) => {
     try {
         await userService.deleteUser(req.body);
@@ -74,6 +61,19 @@ export const getUser = async (req: Request<{ id: string }>, res: Response) => {
     try {
         const user = await userService.getUser(req.params.id);
         res.status(200).json(user);
+    } catch (error) {
+        if(error instanceof Error)
+            res.status(500).send(error.message);
+    }
+}
+
+export const updateUser = async (req: Request<{ id: string }>, res: Response) => {
+    try {
+        const user = await userService.updateUser(req.params.id, req.body);
+        res.status(200).json({
+            message: "User updated successfully!", 
+            user: user
+        });
     } catch (error) {
         if(error instanceof Error)
             res.status(500).send(error.message);

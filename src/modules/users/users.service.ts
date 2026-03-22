@@ -40,26 +40,6 @@ export const getUsers = async (page: number, limit: number) => {
     return users;
 }
 
-export const updateUser = async (user: UpdateUser) => {
-	const { data: roles, error: rolesErr } = await userRepository.getRoles();
-	if(rolesErr){
-		throw new Error(rolesErr.message);
-	}
-	const roleMap = roles.reduce((acc, r) => {
-		acc[r.role_name as keyof RoleMap] = r.role_id;
-		return acc;
-	}, {} as RoleMap);
-
-    const { data: updatedUser, error: userErr } = await userRepository.updateUser(user, roleMap);
-    if(userErr){
-        throw new Error(userErr.message);
-    }
-    if(!updatedUser){
-        throw new Error("User not found");
-    }
-    return updatedUser;
-}
-
 export const deleteUser = async (user: DeleteUser) => {
     const { error: userErr } = await userRepository.deleteUser(user);
     if(userErr){
@@ -98,4 +78,24 @@ export const getUser = async (id: string) => {
         throw new Error("User not found");
     }
     return user;
+}
+
+export const updateUser = async (id: string, user: UpdateUser) => {
+	const { data: roles, error: rolesErr } = await userRepository.getRoles();
+	if(rolesErr){
+		throw new Error(rolesErr.message);
+	}
+	const roleMap = roles.reduce((acc, r) => {
+		acc[r.role_name as keyof RoleMap] = r.role_id;
+		return acc;
+	}, {} as RoleMap);
+
+    const { data: updatedUser, error: userErr } = await userRepository.updateUser(id, user, roleMap);
+    if(userErr){
+        throw new Error(userErr.message);
+    }
+    if(!updatedUser){
+        throw new Error("User not found");
+    }
+    return updatedUser;
 }

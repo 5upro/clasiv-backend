@@ -46,7 +46,6 @@ export const CreateUserSchema = z.discriminatedUnion("base_role", [
 
 export const UpdateUserSchema = BaseCreateUserSchema.partial()
 	.extend({
-		id: z.string().uuid(),
 		roll_no: z.string().optional(),
 		reg_no: z.string().optional(),
 		semester: z.number().optional(),
