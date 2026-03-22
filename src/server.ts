@@ -4,6 +4,7 @@ import path from "path";
 import usersRouter from "@/modules/users/users.routes";
 import authRouter from "@/modules/auth/auth.routes";
 import driveRouter from "@/modules/drive/drive.routes";
+import rolesRouter from "@/modules/roles/roles.routes";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/drive", driveRouter);
+app.use("/roles", rolesRouter);
 app.get("/health", (_req: Request, res: Response) => res.status(200).send("OK"));
 
 app.use((req, res) => {
