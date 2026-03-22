@@ -25,7 +25,7 @@ export const createUser = async (user: CreateUser) => {
         throw new Error("User not created");
     }
     return createdUser;
-};
+}
 
 export const getUsers = async (page: number, limit: number) => {
 	const offset = (page - 1) * limit;
@@ -38,7 +38,7 @@ export const getUsers = async (page: number, limit: number) => {
         throw new Error("Users not found");
     }
     return users;
-};
+}
 
 export const updateUser = async (user: UpdateUser) => {
 	const { data: roles, error: rolesErr } = await userRepository.getRoles();
@@ -58,14 +58,14 @@ export const updateUser = async (user: UpdateUser) => {
         throw new Error("User not found");
     }
     return updatedUser;
-};
+}
 
 export const deleteUser = async (user: DeleteUser) => {
     const { error: userErr } = await userRepository.deleteUser(user);
     if(userErr){
         throw new Error(userErr.message);
     }
-};
+}
 
 export const getSelf = async (id: string) => {
 	const { data: user, error: userErr } = await userRepository.getUserById(id);
@@ -76,7 +76,7 @@ export const getSelf = async (id: string) => {
         throw new Error("User not found");
 	}
     return user;
-};
+}
 
 export const updateSelf = async (id: string, user: UpdateSelf) => {
 	const { data: updatedUser, error: userErr } = await userRepository.updateSelf(id, user);
@@ -87,4 +87,15 @@ export const updateSelf = async (id: string, user: UpdateSelf) => {
         throw new Error("User not found");
 	}
     return updatedUser;
-};
+}
+
+export const getUser = async (id: string) => {
+    const { data: user, error: userErr } = await userRepository.getUserById(id);
+    if(userErr){
+        throw new Error(userErr.message);
+    }
+    if(!user){
+        throw new Error("User not found");
+    }
+    return user;
+}

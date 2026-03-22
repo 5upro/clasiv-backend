@@ -37,5 +37,8 @@ router.patch("/me",
     validator(UpdateSelfSchema),
 	userController.updateSelf
 );
+router.get("/:id", 
+    userController.getUser
+);
 
 export default router;
