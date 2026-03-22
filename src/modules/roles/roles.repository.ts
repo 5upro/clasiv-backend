@@ -2,7 +2,7 @@ import {
 	createClient, 
 	PostgrestSingleResponse 
 } from "@supabase/supabase-js";
-import { Role } from "@/types/users";
+import { Role } from "@/types/roles";
 import dotenv from "dotenv";
 
 dotenv.config();
