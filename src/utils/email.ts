@@ -1,7 +1,10 @@
 import { BrevoClient }  from "@getbrevo/brevo";
+import { capitalizeWords } from "@/utils/string";
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const CLASIV_EMAIL = process.env.CLASIV_EMAIL;
+const BREVO_API_KEY = process.env.BREVO_API_KEY as string;
+const CLASIV_EMAIL = process.env.CLASIV_EMAIL as string;
+const OTP_EXPIRY_TIME = process.env.OTP_EXPIRY_TIME as string;
+const YEAR = new Date().getFullYear();
 
 if(!BREVO_API_KEY || !CLASIV_EMAIL){
     throw new Error("BREVO_API_KEY is not defined");
@@ -17,32 +20,99 @@ export const sendEmail = async (name: string, email: string, otp: string) => {
 			name: "Clasiv", 
 			email: CLASIV_EMAIL 
 		},
-		to: [
-			{ 
-				name: name,
+		to: [{ 
+				name: capitalizeWords(name),
 				email: email
-			}
-		],
+		}],
 		subject: "Comfirm your email for Clasiv",
 		htmlContent: 
 		`
-		<div style="font-family: Arial, sans-serif; padding: 20px;">
-			<h2 style="color: #333;">OTP Verification</h2>
-			<p style="font-size: 16px;">
-				Your OTP is:
-			</p>
-			<p style="
-				font-size: 24px;
-				font-weight: bold;
-				color: #2d89ef;
-				letter-spacing: 3px;
-			">
-                ${otp}
-			</p>
-			<p style="font-size: 12px; color: gray;">
-				This code expires in 3 minutes.
-			</p>
-		</div>	
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<meta charset="UTF-8" />
+				<title>OTP Verification</title>
+			</head>
+			<body style="margin:0; padding:0; background-color:transparent; font-family:Arial, sans-serif;">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td align="center" style="padding: 0;">
+
+							<!-- Main Container -->
+							<table width="500" cellpadding="0" cellspacing="0" border="0" style="background:#E9E9E9; border-radius:10px; padding:30px 10px;">
+
+								<!-- Header -->
+								<tr>
+									<td align="center" style="font-size:36px; font-weight:bold; color:#DC143C;">
+										Clasiv
+									</td>
+								</tr>
+
+								<tr><td height="20"></td></tr>
+
+								<!-- Message -->
+								<tr>
+									<td style="font-size:14px; color:#555555; line-height:1.6;">
+										Hi, ${capitalizeWords(name)}<br>
+										Thank you for using our service.<br>
+										Please use the following One-Time Password(OTP) to complete your verification:
+									</td>
+								</tr>
+
+								<tr><td height="20"></td></tr>
+
+								<!-- OTP Box -->
+								<tr>
+									<td align="center">
+										<div style="
+											display:inline-block;
+											padding:15px 25px;
+											font-size:24px;
+											letter-spacing:4px;
+											font-weight:bold;
+											color:#DC143C;
+											background: #D3D3D3;
+											border-radius:6px;
+											">
+											${otp}
+										</div>
+									</td>
+								</tr>
+
+								<tr><td height="20"></td></tr>
+
+								<!-- Expiry -->
+								<tr>
+									<td style="font-size:14px; color:#555555;">
+										This OTP is valid for the next <strong>${OTP_EXPIRY_TIME} minutes</strong>.
+									</td>
+								</tr>
+
+								<tr><td height="20"></td></tr>
+
+								<!-- Warning -->
+								<tr>
+									<td style="font-size:13px; color:#888888; line-height:1.6;">
+										For security reasons, do not share this code with anyone.<br>
+										If you did not request this, you can safely ignore this email.
+									</td>
+								</tr>
+
+								<tr><td height="30"></td></tr>
+
+								<!-- Footer -->
+								<tr>
+									<td style="font-size:12px; color:#AAAAAA; text-align:center;">
+										© ${YEAR} Clasiv. All rights reserved.
+									</td>
+								</tr>
+
+							</table>
+						</td>
+					</tr>
+				</table>
+			</body>
+		</html>
         `
 	};
 	try {

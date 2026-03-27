@@ -1,14 +1,12 @@
 import "module-alias/register";
 import express, { Request, Response } from "express";
 import path from "path";
+import "dotenv/config";
 import usersRouter from "@/modules/users/users.routes";
 import authRouter from "@/modules/auth/auth.routes";
 import driveRouter from "@/modules/drive/drive.routes";
 import rolesRouter from "@/modules/roles/roles.routes";
 import departmentsRouter from "@/modules/departments/departments.routes";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
