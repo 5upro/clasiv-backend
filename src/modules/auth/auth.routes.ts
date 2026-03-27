@@ -3,11 +3,13 @@ import validator from "@/middleware/global.validator";
 import * as authController from "@/modules/auth/auth.controller";
 import { 
 	LoginSchema, 
-	OtpChangeEmailPayloadSchema, 
-	OtpResendPayloadSchema, 
-	OtpVerifyPayloadSchema, 
 	RegisterSchema,  
 } from "@/types/auth";
+import {
+    OtpVerifyPayloadSchema,
+    OtpResendPayloadSchema,
+    OtpChangeEmailPayloadSchema,
+} from "@/types/otp";
 
 const router = Router();
 

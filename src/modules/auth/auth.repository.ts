@@ -1,10 +1,10 @@
 import { 
-	CreateOtpSession, 
 	OtpSession, 
 	OtpSessionWithUser, 
+	CreateOtpSession, 
 	UpdateOtpSession, 
 	UpdateOtpSessionSchema 
-} from "@/types/auth";
+} from "@/types/otp";
 import { 
 	User 
 } from "@/types/users";

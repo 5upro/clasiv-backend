@@ -19,8 +19,8 @@ export const UserSchema = z.object({
 export const BaseCreateUserSchema = z.object({
 	full_name: z.string(),
 	department_id: z.string().uuid(),
-	email_id: z.string().email().optional(),
-	phone_no: z.string().optional(),
+	email_id: z.string().email().toLowerCase().optional(),
+	phone_no: z.string().trim().length(10).regex(/^\d+$/).optional(),
   
 	base_role: z.enum(["student", "teacher", "admin"]),
 	extended_roles: z.array(z.enum(["cr", "iic"])).optional(),
@@ -28,9 +28,9 @@ export const BaseCreateUserSchema = z.object({
   
 export const CreateStudentSchema = BaseCreateUserSchema.extend({
 	base_role: z.literal("student"),
-	roll_no: z.string(),
-	reg_no: z.string(),
-	semester: z.number(),
+	roll_no: z.string().length(11),
+	reg_no: z.string().length(13),
+	semester: z.number().min(1).max(8),
 	dob: z.coerce.date(),
 });  
   
@@ -46,9 +46,9 @@ export const CreateUserSchema = z.discriminatedUnion("base_role", [
 
 export const UpdateUserSchema = BaseCreateUserSchema.partial()
 	.extend({
-		roll_no: z.string().optional(),
-		reg_no: z.string().optional(),
-		semester: z.number().optional(),
+		roll_no: z.string().length(11).optional(),
+		reg_no: z.string().length(13).optional(),
+		semester: z.number().min(1).max(8).optional(),
 		dob: z.coerce.date().optional(),
 		teacher_abbrv: z.string().optional(),
 	}).refine((data) => {
@@ -65,8 +65,8 @@ export const UpdateUserSchema = BaseCreateUserSchema.partial()
 );
 
 export const UpdateSelfSchema = z.object({
-    email_id: z.string().email().optional(),
-    phone_no: z.string().optional(),
+    email_id: z.string().email().toLowerCase().optional(),
+    phone_no: z.string().trim().length(10).regex(/^\d+$/).optional(),
 	dob: z.coerce.date().optional(),
 });
 

@@ -11,12 +11,14 @@ import {
 } from "@/utils/otp";
 import { sendEmail } from "@/utils/email";
 import { 
+    RegisterPayload, 
     LoginPayload,
-	OtpChangeEmailPayload, 
-	OtpResendPayload, 
-	OtpVerifyPayload, 
-    RegisterPayload
 } from "@/types/auth";
+import {
+    OtpVerifyPayload,
+    OtpResendPayload,
+    OtpChangeEmailPayload
+} from "@/types/otp";
 
 export const register = async (regData: RegisterPayload) => {
 	const { data: user, error: userErr } = await authRepository.getUserByRoll(regData.roll_no);
