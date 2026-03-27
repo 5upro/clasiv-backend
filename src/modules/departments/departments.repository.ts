@@ -6,9 +6,6 @@ import {
 	CreateDepartment, 
 	Department 
 } from "@/types/department";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const SUPABASE_URL = process.env.SUPABASE_URL as string;
 const SUPABASE_KEY = process.env.SUPABASE_KEY as string;
