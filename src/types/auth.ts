@@ -12,11 +12,11 @@ export const AccessTokenSchema = z.object({
 
 export const RegisterSchema = z.object({
     roll_no: z.string().min(11).max(11),
-    email: z.string().email(),
+    email_id: z.string().email(),
 });
 
 export const LoginSchema = z.object({
-    email: z.string().email(),
+    email_id: z.string().email(),
 });
 
 export const OtpSessionSchema = z.object({
@@ -57,35 +57,35 @@ export const UpdateOtpSessionSchema = OtpSessionSchema.omit({
 	user_agent: true
 }).partial();
 
-export const OtpPayloadSchema = z.object({
-	session_id: z.string().uuid(),
-	email: z.string().email(),
+export const CreateOtpSessionSchema = z.object({
+	user_id: z.string().uuid(),
+	email_id: z.string().email(),
 	value: z.string(),
 	type: z.enum(["register", "login"]),
 });
 
-export const OtpVerifySchema = z.object({
+export const OtpVerifyPayloadSchema = z.object({
 	session_id: z.string().uuid(),
 	value: z.string(),
 });
 
-export const OtpResendSchema = z.object({
+export const OtpResendPayloadSchema = z.object({
 	session_id: z.string().uuid(),
 });
 
-export const OtpChangeEmailSchema = z.object({
+export const OtpChangeEmailPayloadSchema = z.object({
 	session_id: z.string().uuid(),
-	email: z.string().email(),
+	email_id: z.string().email(),
 })
 
-export type RefreshTokenPayload = z.infer<typeof RefreshTokenSchema>;
-export type AccessTokenPayload = z.infer<typeof AccessTokenSchema>;
-export type RegisterPayload = z.infer<typeof RegisterSchema>;
-export type LoginPayload = z.infer<typeof LoginSchema>;
-export type OtpSession = z.infer<typeof OtpSessionSchema>;
-export type OtpSessionWithUser = z.infer<typeof OtpSessionWithUserSchema>;
-export type UpdateOtpSession = z.infer<typeof UpdateOtpSessionSchema>;
-export type OtpPayload = z.infer<typeof OtpPayloadSchema>;
-export type OtpVerify = z.infer<typeof OtpVerifySchema>;
-export type OtpResend = z.infer<typeof OtpResendSchema>;
-export type OtpChangeEmail = z.infer<typeof OtpChangeEmailSchema>;
+export type RefreshTokenPayload =	z.infer<typeof RefreshTokenSchema>;
+export type AccessTokenPayload =	z.infer<typeof AccessTokenSchema>;
+export type RegisterPayload =		z.infer<typeof RegisterSchema>;
+export type LoginPayload =			z.infer<typeof LoginSchema>;
+export type OtpSession =			z.infer<typeof OtpSessionSchema>;
+export type OtpSessionWithUser =	z.infer<typeof OtpSessionWithUserSchema>;
+export type CreateOtpSession =		z.infer<typeof CreateOtpSessionSchema>;
+export type UpdateOtpSession =		z.infer<typeof UpdateOtpSessionSchema>;
+export type OtpVerifyPayload =		z.infer<typeof OtpVerifyPayloadSchema>;
+export type OtpResendPayload =		z.infer<typeof OtpResendPayloadSchema>;
+export type OtpChangeEmailPayload = z.infer<typeof OtpChangeEmailPayloadSchema>;

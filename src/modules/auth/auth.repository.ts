@@ -1,5 +1,5 @@
 import { 
-	OtpPayload, 
+	CreateOtpSession, 
 	OtpSession, 
 	OtpSessionWithUser, 
 	UpdateOtpSession, 
@@ -51,13 +51,13 @@ export const getUserByRoll = async (roll_no: string) => {
 }
 
 export const setOtpStatus = async (
-	otp: OtpPayload
+	otp: CreateOtpSession
 ): Promise<PostgrestSingleResponse<OtpSession>> => {
     return await supabase
         .from("otp_sessions")
         .insert({
-			user_id: otp.session_id,
-			email_id: otp.email,
+			user_id: otp.user_id,
+			email_id: otp.email_id,
             otp_hash: otp.value,
 			purpose: otp.type
 		})

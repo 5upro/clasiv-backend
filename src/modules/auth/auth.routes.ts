@@ -3,10 +3,10 @@ import validator from "@/middleware/global.validator";
 import * as authController from "@/modules/auth/auth.controller";
 import { 
 	LoginSchema, 
-	OtpChangeEmailSchema, 
-	OtpResendSchema, 
-	OtpVerifySchema, 
-	RegisterSchema 
+	OtpChangeEmailPayloadSchema, 
+	OtpResendPayloadSchema, 
+	OtpVerifyPayloadSchema, 
+	RegisterSchema,  
 } from "@/types/auth";
 
 const router = Router();
@@ -20,15 +20,15 @@ router.post("/login",
 	authController.login
 );
 router.post("/otp/verification", 
-    validator(OtpVerifySchema),
+    validator(OtpVerifyPayloadSchema),
 	authController.otpVerification
 );
 router.post("/otp/resend",
-    validator(OtpResendSchema),
+    validator(OtpResendPayloadSchema),
 	authController.resendOtp
 );
 router.post("/otp/change-email",
-    validator(OtpChangeEmailSchema),
+    validator(OtpChangeEmailPayloadSchema),
 	authController.changeEmail
 );
 router.post("/refresh", 

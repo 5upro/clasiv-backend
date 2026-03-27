@@ -12,9 +12,9 @@ import {
 import { sendEmail } from "@/utils/email";
 import { 
     LoginPayload,
-	OtpChangeEmail, 
-	OtpResend, 
-	OtpVerify, 
+	OtpChangeEmailPayload, 
+	OtpResendPayload, 
+	OtpVerifyPayload, 
     RegisterPayload
 } from "@/types/auth";
 
@@ -28,14 +28,14 @@ export const register = async (regData: RegisterPayload) => {
 	const otpHash = hashOtp(otp);
 
 	const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
-		session_id: user.id, 
-		email: regData.email, 
+		user_id: user.id, 
+		email_id: regData.email_id, 
 		value: otpHash, 
 		type: "register"
 	});
 	if(otpErr) throw new Error(otpErr.message);
 
-	await sendEmail(user.full_name, regData.email, otp);
+	await sendEmail(user.full_name, regData.email_id, otp);
 	return {
 		session_id: otpSession.id, 
 		full_name: user.full_name
@@ -43,7 +43,7 @@ export const register = async (regData: RegisterPayload) => {
 }
 
 export const login = async (loginData: LoginPayload) => {
-	const { data: user, error: userErr } = await authRepository.getUserByEmail(loginData.email);
+	const { data: user, error: userErr } = await authRepository.getUserByEmail(loginData.email_id);
 	if(userErr) throw new Error(userErr.message);
 	if(!user) throw new Error("User is not Resgistered");
 
@@ -51,21 +51,21 @@ export const login = async (loginData: LoginPayload) => {
 	const otpHash = hashOtp(otp);
 
 	const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
-		session_id: user.id, 
-		email: loginData.email, 
+		user_id: user.id, 
+		email_id: loginData.email_id, 
 		value: otpHash, 
 		type: "login"
 	});
 	if(otpErr) throw new Error(otpErr.message);
 
-	await sendEmail(user.full_name, loginData.email, otp);
+	await sendEmail(user.full_name, loginData.email_id, otp);
 	return {
 		session_id: otpSession.id, 
 		full_name: user.full_name
 	};
 }
 
-export const otpVerification = async (otpData: OtpVerify) => {
+export const otpVerification = async (otpData: OtpVerifyPayload) => {
 	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
 	const now = new Date();
 
@@ -124,7 +124,7 @@ export const otpVerification = async (otpData: OtpVerify) => {
 	};
 }
 
-export const resendOtp = async (otpData: OtpResend) => {
+export const resendOtp = async (otpData: OtpResendPayload) => {
 	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
 
 	if(otpErr) throw new Error(otpErr.message);
@@ -154,7 +154,7 @@ export const resendOtp = async (otpData: OtpResend) => {
 	};
 }
 
-export const changeEmail = async (otpData: OtpChangeEmail) => {
+export const changeEmail = async (otpData: OtpChangeEmailPayload) => {
 	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
 
 	if(otpErr) throw new Error(otpErr.message);
@@ -170,7 +170,7 @@ export const changeEmail = async (otpData: OtpChangeEmail) => {
 	const otpHash = hashOtp(otp);
 
 	await authRepository.updateOtpStatus(otpSession.id, {
-		email_id: otpData.email,
+		email_id: otpData.email_id,
 		otp_hash: otpHash, 
 		change_email_count: otpSession.change_email_count + 1,
 		otp_attempts: 0,
@@ -179,7 +179,7 @@ export const changeEmail = async (otpData: OtpChangeEmail) => {
 		expires_at: new Date(Date.now() + 3 * 60 * 1000)
 	});
 
-	await sendEmail(otpSession.users.full_name, otpData.email, otp);
+	await sendEmail(otpSession.users.full_name, otpData.email_id, otp);
 	return {
 		session_id: otpSession.id, 
 		full_name: otpSession.users.full_name
