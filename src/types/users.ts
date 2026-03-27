@@ -1,4 +1,8 @@
-import z from "zod";
+import { z } from "zod";
+import { 
+    BaseRoleEnum,
+    ExtendedRoleEnum,
+} from "@/types/roles";
   
 export const UserSchema = z.object({
 	id: z.string(),
@@ -22,8 +26,8 @@ export const BaseCreateUserSchema = z.object({
 	email_id: z.string().email().toLowerCase().optional(),
 	phone_no: z.string().trim().length(10).regex(/^\d+$/).optional(),
   
-	base_role: z.enum(["student", "teacher", "admin"]),
-	extended_roles: z.array(z.enum(["cr", "iic"])).optional(),
+	base_role: BaseRoleEnum,
+	extended_roles: z.array(ExtendedRoleEnum).optional(),
 });  
   
 export const CreateStudentSchema = BaseCreateUserSchema.extend({
@@ -70,17 +74,7 @@ export const UpdateSelfSchema = z.object({
 	dob: z.coerce.date().optional(),
 });
 
-export const RoleSchema = z.object({
-    role_id: z.number(),
-    role_name: z.string(),
-});
-
-type BaseRole = "student" | "teacher" | "admin";
-type ExtendedRole = "cr" | "iic";
-
 export type User = z.infer<typeof UserSchema>;
 export type CreateUser = z.infer<typeof CreateUserSchema>;
 export type UpdateUser = z.infer<typeof UpdateUserSchema>;
 export type UpdateSelf = z.infer<typeof UpdateSelfSchema>;
-export type Role = z.infer<typeof RoleSchema>;
-export type RoleMap = Record<BaseRole | ExtendedRole, number>;

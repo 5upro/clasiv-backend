@@ -2,10 +2,12 @@ import {
 	User, 
 	CreateUser, 
 	UpdateUser, 
-	Role, 
-	RoleMap,
     UpdateSelf, 
 } from "@/types/users";
+import {
+    Role,
+    RoleMap
+} from "@/types/roles";
 import { 
 	createClient, 
 	PostgrestSingleResponse 
