@@ -1,13 +1,13 @@
 import * as userRepository from "@/modules/users/users.repository";
 import * as departmentRepository from "@/modules/departments/departments.repository";
-import { 
+import type { 
 	CreateUser, 
 	UpdateUser, 
     UpdateSelf,
     BaseGetUser, 
 } from "@/types/users";
-import { RoleMap } from "@/types/roles";
-import { DepartmentAbbrvMap } from "@/types/department";
+import type { RoleMap } from "@/types/roles";
+import type { DepartmentAbbrvMap } from "@/types/department";
 
 export const createUser = async (user: CreateUser) => {
 	const { data: roles, error: rolesErr } = await userRepository.getRoles();

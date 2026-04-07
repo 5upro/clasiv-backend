@@ -1,19 +1,19 @@
-import { 
+import type { 
 	User, 
 	CreateUser, 
 	UpdateUser, 
     UpdateSelf,
     BaseGetUser, 
 } from "@/types/users";
-import {
+import type {
     Role,
     RoleMap
 } from "@/types/roles";
 import { 
 	createClient, 
-	PostgrestSingleResponse 
+	type PostgrestSingleResponse 
 } from "@supabase/supabase-js";
-import { DepartmentAbbrvMap } from "@/types/department";
+import type { DepartmentAbbrvMap } from "@/types/department";
 
 const SUPABASE_URL = process.env.SUPABASE_URL as string;
 const SUPABASE_KEY = process.env.SUPABASE_KEY as string;

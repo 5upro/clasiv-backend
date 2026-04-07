@@ -1,16 +1,16 @@
-import { 
+import type { 
 	OtpSession, 
 	OtpSessionWithUser, 
 	CreateOtpSession, 
 	UpdateOtpSession, 
-	UpdateOtpSessionSchema 
 } from "@/types/otp";
-import { 
+import { UpdateOtpSessionSchema } from "@/types/otp";
+import type { 
 	User 
 } from "@/types/users";
 import { 
 	createClient, 
-	PostgrestSingleResponse 
+	type PostgrestSingleResponse 
 } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL as string;

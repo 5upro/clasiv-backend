@@ -1,4 +1,7 @@
-import { Request, Response } from "express";
+import type { 
+	Request, 
+	Response 
+} from "express";
 import * as authService from "@/modules/auth/auth.service";
 
 export const register = async (req: Request, res: Response) => {

@@ -1,4 +1,7 @@
-import { Request, Response } from "express";
+import type { 
+	Request, 
+	Response 
+} from "express";
 import * as driveService from "./drive.service";
 
 export const getFolders = async (req: Request, res: Response) => {

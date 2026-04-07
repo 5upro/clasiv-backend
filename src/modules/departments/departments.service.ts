@@ -1,5 +1,5 @@
 import * as departmentRepository from "@/modules/departments/departments.repository";
-import { CreateDepartment } from "@/types/department";
+import type { CreateDepartment } from "@/types/department";
 
 export const getDepartments = async () => {
 	const { 

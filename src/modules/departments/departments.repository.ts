@@ -1,8 +1,8 @@
 import { 
 	createClient, 
-	PostgrestSingleResponse 
+	type PostgrestSingleResponse 
 } from "@supabase/supabase-js";
-import { 
+import type { 
 	CreateDepartment, 
 	Department 
 } from "@/types/department";

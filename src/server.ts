@@ -1,5 +1,8 @@
-import "module-alias/register";
-import express, { Request, Response } from "express";
+import express from "express";
+import type { 
+	Response, 
+	Request, 
+} from 'express';
 import path from "path";
 import "dotenv/config";
 import usersRouter from "@/modules/users/users.routes";

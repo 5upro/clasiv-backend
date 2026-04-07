@@ -1,4 +1,4 @@
-import { 
+import type { 
 	AccessTokenPayload, 
 	RefreshTokenPayload 
 } from "@/types/auth";

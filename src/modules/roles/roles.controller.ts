@@ -1,4 +1,7 @@
-import { Request, Response } from "express";
+import type { 
+	Request, 
+	Response 
+} from "express";
 import * as roleService from "@/modules/roles/roles.service";
 
 export const getRoles = async (_req: Request, res: Response) => {

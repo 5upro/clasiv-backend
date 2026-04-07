@@ -1,4 +1,7 @@
-import { Request, Response } from "express";
+import type { 
+	Request, 
+	Response 
+} from "express";
 import * as departmentService from "@/modules/departments/departments.service";
 
 export const getDepartments = async (_req: Request, res: Response) => {

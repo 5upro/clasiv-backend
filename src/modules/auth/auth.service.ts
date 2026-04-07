@@ -10,11 +10,11 @@ import {
 	verifyOTP 
 } from "@/utils/otp";
 import { sendEmail } from "@/utils/email";
-import { 
+import type { 
     RegisterPayload, 
     LoginPayload,
 } from "@/types/auth";
-import {
+import type {
     OtpVerifyPayload,
     OtpResendPayload,
     OtpChangeEmailPayload

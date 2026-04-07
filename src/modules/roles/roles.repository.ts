@@ -1,8 +1,8 @@
 import { 
 	createClient, 
-	PostgrestSingleResponse 
+	type PostgrestSingleResponse 
 } from "@supabase/supabase-js";
-import { CreateRole, Role } from "@/types/roles";
+import type { CreateRole, Role } from "@/types/roles";
 
 const SUPABASE_URL = process.env.SUPABASE_URL as string;
 const SUPABASE_KEY = process.env.SUPABASE_KEY as string;

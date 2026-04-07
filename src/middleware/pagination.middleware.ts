@@ -1,5 +1,12 @@
-import { Request, Response, NextFunction } from "express";
-import { Pagination, PaginationSchema } from "@/types/httpQuery";
+import type { 
+	Response, 
+	Request, 
+	NextFunction, 
+} from 'express';
+import type { 
+	Pagination, 
+	PaginationSchema 
+} from "@/types/httpQuery";
 import { BaseGetUserSchema } from "@/types/users";
 
 const paginationValidator = (req: Request, res: Response, next: NextFunction) => {

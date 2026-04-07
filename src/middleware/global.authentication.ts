@@ -1,4 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import type { 
+	Response, 
+	Request, 
+	NextFunction, 
+} from 'express';
 import { verifyAccessToken } from "@/utils/token";
 
 const authentication = (req: Request, res: Response, next: NextFunction) => {
@@ -9,7 +13,7 @@ const authentication = (req: Request, res: Response, next: NextFunction) => {
 
 	const token = authHeader?.split(" ")[1];
 	try {
-		const decode = verifyAccessToken(token);
+		const decode = verifyAccessToken(token!);
 		req.user = decode;
         next();
 	} catch (error) {

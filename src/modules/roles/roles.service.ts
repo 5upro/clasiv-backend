@@ -1,5 +1,5 @@
 import * as roleRepository from "@/modules/roles/roles.repository";
-import { CreateRole } from "@/types/roles";
+import type { CreateRole } from "@/types/roles";
 
 export const getRoles = async () => {
 	const { data: roles, error: rolesErr } = await roleRepository.getRoles();
