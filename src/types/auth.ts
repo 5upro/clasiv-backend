@@ -15,9 +15,16 @@ export const ActivationSchema = z.object({
     password: z.string(),
 });
 
-export const LoginSchema = z.object({
-    email_id: z.string().email().toLowerCase(),
-});
+export const LoginSchema = z.union([
+	z.object({
+		user_name: z.string().toLowerCase(),
+		password: z.string(),
+	}),
+	z.object({
+		email_id: z.string().email().toLowerCase(),
+		password: z.string(),
+	}),
+]);
 
 export type RefreshTokenPayload =	z.infer<typeof RefreshTokenSchema>;
 export type AccessTokenPayload =	z.infer<typeof AccessTokenSchema>;

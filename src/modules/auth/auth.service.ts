@@ -45,27 +45,32 @@ export const activate = async (activateData: ActivationPayload) => {
 }
 
 export const login = async (loginData: LoginPayload) => {
-	const { data: user, error: userErr } = await authRepository.getUserByEmail(loginData.email_id);
+	const { data: user, error: userErr } =
+		"user_name" in loginData
+			? await authRepository.getUserByUserName(loginData.user_name)
+			: await authRepository.getUserByEmail(loginData.email_id);
+
 	if(userErr) throw new Error(userErr.message);
-	if(!user) throw new Error("User is not Resgistered");
+	if(!user) throw new Error("User not found");
+	if(!user.email_id) throw new Error("User is not activated");
 
-	const otp = generateOtp();
-	const otpHash = hashOtp(otp);
-
-	const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
-		user_id: user.id, 
-		email_id: loginData.email_id, 
-		value: otpHash, 
-		type: "login"
+	const refresh_token = generateRefreshToken({ 
+		id: user.id 
 	});
-	if(otpErr) throw new Error(otpErr.message);
+	const access_token = generateAccessToken({
+		id: user.id,
+		role: user.base_role,
+		extended_roles: user.extended_roles
+	});
 
-	await sendEmail(user.full_name, loginData.email_id, otp);
 	return {
-		session_id: otpSession.id, 
-		full_name: user.full_name
+		user,
+		tokens: {
+			access_token,
+			refresh_token
+		}
 	};
-}
+};
 
 export const otpVerification = async (otpData: OtpVerifyPayload) => {
 	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);

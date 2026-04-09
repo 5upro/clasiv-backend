@@ -25,14 +25,10 @@ export const activate = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
 	try {
-		const loginData = req.body;
-		const { 
-			session_id, 
-			full_name: user 
-		} = await authService.login(loginData);
+		const { tokens, user } = await authService.login(req.body);
 		res.status(200).json({ 
-			message: "OTP sent!", 
-			session_id, 
+			message: "Login successful!", 
+			tokens,
 			user
 		});
 	} catch (error) {
@@ -45,8 +41,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const otpVerification = async (req: Request, res: Response) => {
 	try {
-		const otpData = req.body;
-		const { user, tokens } = await authService.otpVerification(otpData);
+		const { user, tokens } = await authService.otpVerification(req.body);
 		res.status(200).json({ 
 			message: "Account verified successfully!" ,
 			user,
