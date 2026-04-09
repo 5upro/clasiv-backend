@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+export const OtpPurposeEnum = z.enum(["activate", "login"]);
+
 export const OtpSessionSchema = z.object({
 	id: z.string().uuid(),
 	user_id: z.string().uuid(),
 	email_id: z.string().email(),
-	purpose: z.enum(["register", "login"]),
+	purpose: OtpPurposeEnum,
 	otp_hash: z.string(),
 	status: z.enum(["pending", "used", "expired"]).default("pending"),
 	otp_attempts: z.number().int().nonnegative(),
@@ -30,7 +32,7 @@ export const CreateOtpSessionSchema = z.object({
 	user_id: z.string().uuid(),
 	email_id: z.string().email(),
 	value: z.string(),
-	type: z.enum(["register", "login"]),
+	type: OtpPurposeEnum,
 });
 
 export const UpdateOtpSessionSchema = OtpSessionSchema.omit({
@@ -59,10 +61,10 @@ export const OtpChangeEmailPayloadSchema = z.object({
 	email_id: z.string().email().toLowerCase(),
 })
 
-export type OtpSession =			z.infer<typeof OtpSessionSchema>;
-export type OtpSessionWithUser =	z.infer<typeof OtpSessionWithUserSchema>;
-export type CreateOtpSession =		z.infer<typeof CreateOtpSessionSchema>;
-export type UpdateOtpSession =		z.infer<typeof UpdateOtpSessionSchema>;
-export type OtpVerifyPayload =		z.infer<typeof OtpVerifyPayloadSchema>;
-export type OtpResendPayload =		z.infer<typeof OtpResendPayloadSchema>;
-export type OtpChangeEmailPayload = z.infer<typeof OtpChangeEmailPayloadSchema>;
+export type OtpSession				= z.infer<typeof OtpSessionSchema>;
+export type OtpSessionWithUser		= z.infer<typeof OtpSessionWithUserSchema>;
+export type CreateOtpSession		= z.infer<typeof CreateOtpSessionSchema>;
+export type UpdateOtpSession		= z.infer<typeof UpdateOtpSessionSchema>;
+export type OtpVerifyPayload		= z.infer<typeof OtpVerifyPayloadSchema>;
+export type OtpResendPayload		= z.infer<typeof OtpResendPayloadSchema>;
+export type OtpChangeEmailPayload	= z.infer<typeof OtpChangeEmailPayloadSchema>;

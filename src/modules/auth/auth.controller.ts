@@ -19,13 +19,28 @@ export const activate = async (req: Request, res: Response) => {
 	}
 }
 
+export const activateVerification = async (req: Request, res: Response) => {
+    try {
+        const { session_id } = await authService.activateVerification(req.body);
+        res.status(200).json({ 
+            message: "Account activated successfully!", 
+			session_id
+        });
+    } catch (error) {
+        if (error instanceof Error) {
+            return res.status(400).json({ message: error.message });
+        }
+        return res.status(500).json({ message: "Unknown error" });
+    }
+}
+
 export const login = async (req: Request, res: Response) => {
 	try {
-		const { tokens, user } = await authService.login(req.body);
+		const { user, tokens } = await authService.login(req.body);
 		res.status(200).json({ 
 			message: "Login successful!", 
-			tokens,
-			user
+			user,
+			tokens
 		});
 	} catch (error) {
 		if (error instanceof Error) {

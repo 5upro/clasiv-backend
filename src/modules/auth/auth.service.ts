@@ -12,6 +12,7 @@ import {
 import { sendEmail } from "@/utils/email";
 import type { 
     ActivationPayload, 
+	ActivateVerificationPayload, 
     LoginPayload,
 } from "@/types/auth";
 import type {
@@ -19,6 +20,7 @@ import type {
     OtpResendPayload,
     OtpChangeEmailPayload
 } from "@/types/otp";
+import { updateUser } from "../users/users.service";
 
 export const activate = async (activateData: ActivationPayload) => {
 	const { data: user, error: userErr } = await authRepository.getUserByUserName(activateData.user_name);
@@ -29,6 +31,43 @@ export const activate = async (activateData: ActivationPayload) => {
 	return {
 		full_name: user.full_name
 	};
+}
+
+export const activateVerification = async (activateData: ActivateVerificationPayload) => {
+    const { data: user, error: userErr } = await authRepository.getUserByUserName(activateData.user_name);
+    if(userErr) throw new Error(userErr.message);
+    if(!user) throw new Error("User not found");
+    if(!user.email_id) throw new Error("User is not activated");
+
+	const { data: updatedUser, error: updatedUserErr } = await updateUser(user.id, {
+		user_name: activateData.user_name,
+        email_id: activateData.email_id,
+		phone_no: activateData.phone_no,
+		password: activateData.password
+	});
+    if(updatedUserErr) throw new Error(updatedUserErr.message);
+    if(!updatedUser) throw new Error("User not found");
+
+    const otp = generateOtp();
+    const otpHash = hashOtp(otp);
+
+    const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
+        user_id: updatedUser.id,
+        email_id: updatedUser.email_id,
+        value: otpHash,
+        type: "activate"
+    });
+    if(otpErr) throw new Error(otpErr.message);
+    if(!otpSession) throw new Error("User not found");
+
+    await sendEmail(
+		updatedUser.full_name, 
+		updatedUser.email_id, 
+		otp
+	);
+	return {
+        session_id: otpSession.id
+    };
 }
 
 export const login = async (loginData: LoginPayload) => {

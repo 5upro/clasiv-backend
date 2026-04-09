@@ -2,8 +2,9 @@ import { Router } from "express";
 import validator from "@/middleware/global.validator";
 import * as authController from "@/modules/auth/auth.controller";
 import { 
+	ActivationSchema,
+    ActivateVerificationSchema,  
 	LoginSchema, 
-	ActivationSchema,  
 } from "@/types/auth";
 import {
     OtpVerifyPayloadSchema,
@@ -16,6 +17,10 @@ const router = Router();
 router.post("/activate", 
 	validator(ActivationSchema),
 	authController.activate
+);
+router.post("/activate/verification", 
+    validator(ActivateVerificationSchema),
+    authController.activateVerification
 );
 router.post("/login", 
     validator(LoginSchema),

@@ -15,6 +15,11 @@ export const ActivationSchema = z.object({
     password: z.string(),
 });
 
+export const ActivateVerificationSchema = ActivationSchema.extend({
+    email_id: z.string().email().toLowerCase(),
+	phone_no: z.string().trim().length(10).regex(/^\d+$/),
+})
+
 export const LoginSchema = z.union([
 	z.object({
 		user_name: z.string().toLowerCase(),
@@ -26,7 +31,8 @@ export const LoginSchema = z.union([
 	}),
 ]);
 
-export type RefreshTokenPayload =	z.infer<typeof RefreshTokenSchema>;
-export type AccessTokenPayload =	z.infer<typeof AccessTokenSchema>;
-export type ActivationPayload =		z.infer<typeof ActivationSchema>;
-export type LoginPayload =			z.infer<typeof LoginSchema>;
+export type RefreshTokenPayload			= z.infer<typeof RefreshTokenSchema>;
+export type AccessTokenPayload			= z.infer<typeof AccessTokenSchema>;
+export type ActivationPayload			= z.infer<typeof ActivationSchema>;
+export type ActivateVerificationPayload = z.infer<typeof ActivateVerificationSchema>;
+export type LoginPayload				= z.infer<typeof LoginSchema>;
