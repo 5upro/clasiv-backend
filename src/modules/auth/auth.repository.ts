@@ -17,6 +17,12 @@ export const getUserById = async (id: string): Promise<PostgrestSingleResponse<U
 	}).single();
 }
 
+export const getUserByUserName = async (user_name: string): Promise<PostgrestSingleResponse<User>> => {
+    return await supabase.rpc("get_user_by_username", {
+        _user_name: user_name
+    }).single();
+}
+
 export const getUserByEmail = async (email: string) => {
     return await supabase
         .from("users")

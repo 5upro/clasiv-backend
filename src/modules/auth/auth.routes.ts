@@ -3,7 +3,7 @@ import validator from "@/middleware/global.validator";
 import * as authController from "@/modules/auth/auth.controller";
 import { 
 	LoginSchema, 
-	RegisterSchema,  
+	ActivationSchema,  
 } from "@/types/auth";
 import {
     OtpVerifyPayloadSchema,
@@ -13,9 +13,9 @@ import {
 
 const router = Router();
 
-router.post("/register", 
-	validator(RegisterSchema),
-	authController.register
+router.post("/activate", 
+	validator(ActivationSchema),
+	authController.activate
 );
 router.post("/login", 
     validator(LoginSchema),

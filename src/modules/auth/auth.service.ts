@@ -11,7 +11,7 @@ import {
 } from "@/utils/otp";
 import { sendEmail } from "@/utils/email";
 import type { 
-    RegisterPayload, 
+    ActivationPayload, 
     LoginPayload,
 } from "@/types/auth";
 import type {
@@ -20,24 +20,24 @@ import type {
     OtpChangeEmailPayload
 } from "@/types/otp";
 
-export const register = async (regData: RegisterPayload) => {
-	const { data: user, error: userErr } = await authRepository.getUserByRoll(regData.roll_no);
+export const activate = async (activateData: ActivationPayload) => {
+	const { data: user, error: userErr } = await authRepository.getUserByUserName(activateData.user_name);
 	if(userErr) throw new Error(userErr.message);
 	if(!user) throw new Error("User not found");
-	if(user.email_id) throw new Error("User is already registered");
+	if(user.email_id) throw new Error("User is already activated");
 
 	const otp = generateOtp();
 	const otpHash = hashOtp(otp);
 
 	const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
 		user_id: user.id, 
-		email_id: regData.email_id, 
+		email_id: user.email_id, 
 		value: otpHash, 
 		type: "register"
 	});
 	if(otpErr) throw new Error(otpErr.message);
 
-	await sendEmail(user.full_name, regData.email_id, otp);
+	await sendEmail(user.full_name, user.email_id, otp);
 	return {
 		session_id: otpSession.id, 
 		full_name: user.full_name

@@ -10,9 +10,9 @@ export const AccessTokenSchema = z.object({
 	extended_roles: z.array(z.string()),
 });
 
-export const RegisterSchema = z.object({
-    roll_no: z.string().min(11).max(11),
-    email_id: z.string().email().toLowerCase(),
+export const ActivationSchema = z.object({
+    user_name: z.string(),
+    password: z.string(),
 });
 
 export const LoginSchema = z.object({
@@ -21,5 +21,5 @@ export const LoginSchema = z.object({
 
 export type RefreshTokenPayload =	z.infer<typeof RefreshTokenSchema>;
 export type AccessTokenPayload =	z.infer<typeof AccessTokenSchema>;
-export type RegisterPayload =		z.infer<typeof RegisterSchema>;
+export type ActivationPayload =		z.infer<typeof ActivationSchema>;
 export type LoginPayload =			z.infer<typeof LoginSchema>;
