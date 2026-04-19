@@ -1,5 +1,40 @@
 import { relations } from "drizzle-orm/relations";
-import { roles, users, departments, courses, teachers, assignments, assignmentUploadLogs, students, semesters, subjects, otpSessions, permissions, rolePermissions, roleExtendedUsers, teacherDepartments, teacherSubjects, studentAssignments } from "./schema";
+import { colleges, collegeCourseSubjects, courseSubjects, roles, users, departments, courses, collegeCourses, enrollments, students, universities, teachers, assignments, assignmentUploadLogs, subjects, otpSessions, teacherSubjects, teacherColleges, permissions, rolePermissions, roleExtendedUsers, teacherDepartments, studentAssignments } from "./schema";
+
+export const collegeCourseSubjectsRelations = relations(collegeCourseSubjects, ({one, many}) => ({
+	college: one(colleges, {
+		fields: [collegeCourseSubjects.collegeId],
+		references: [colleges.id]
+	}),
+	courseSubject: one(courseSubjects, {
+		fields: [collegeCourseSubjects.courseSubjectId],
+		references: [courseSubjects.id]
+	}),
+	assignments: many(assignments),
+	teacherSubjects: many(teacherSubjects),
+}));
+
+export const collegesRelations = relations(colleges, ({one, many}) => ({
+	collegeCourseSubjects: many(collegeCourseSubjects),
+	university: one(universities, {
+		fields: [colleges.universityId],
+		references: [universities.id]
+	}),
+	teacherColleges: many(teacherColleges),
+	collegeCourses: many(collegeCourses),
+}));
+
+export const courseSubjectsRelations = relations(courseSubjects, ({one, many}) => ({
+	collegeCourseSubjects: many(collegeCourseSubjects),
+	course: one(courses, {
+		fields: [courseSubjects.courseId],
+		references: [courses.id]
+	}),
+	subject: one(subjects, {
+		fields: [courseSubjects.subjectId],
+		references: [subjects.id]
+	}),
+}));
 
 export const usersRelations = relations(users, ({one, many}) => ({
 	role: one(roles, {
@@ -24,26 +59,75 @@ export const coursesRelations = relations(courses, ({one, many}) => ({
 		fields: [courses.departmentId],
 		references: [departments.id]
 	}),
-	teacher: one(teachers, {
-		fields: [courses.hodId],
-		references: [teachers.userId]
-	}),
-	semesters: many(semesters),
+	courseSubjects: many(courseSubjects),
+	collegeCourses: many(collegeCourses),
 }));
 
-export const departmentsRelations = relations(departments, ({many}) => ({
+export const departmentsRelations = relations(departments, ({one, many}) => ({
 	courses: many(courses),
+	enrollments: many(enrollments),
+	university: one(universities, {
+		fields: [departments.universityId],
+		references: [universities.id]
+	}),
 	teacherDepartments: many(teacherDepartments),
 }));
 
+export const enrollmentsRelations = relations(enrollments, ({one}) => ({
+	collegeCourse: one(collegeCourses, {
+		fields: [enrollments.collegeId],
+		references: [collegeCourses.collegeId]
+	}),
+	department: one(departments, {
+		fields: [enrollments.departmentId],
+		references: [departments.id]
+	}),
+	student: one(students, {
+		fields: [enrollments.studentId],
+		references: [students.userId]
+	}),
+	university: one(universities, {
+		fields: [enrollments.universityId],
+		references: [universities.id]
+	}),
+}));
+
+export const collegeCoursesRelations = relations(collegeCourses, ({one, many}) => ({
+	enrollments: many(enrollments),
+	college: one(colleges, {
+		fields: [collegeCourses.collegeId],
+		references: [colleges.id]
+	}),
+	course: one(courses, {
+		fields: [collegeCourses.courseId],
+		references: [courses.id]
+	}),
+}));
+
+export const studentsRelations = relations(students, ({one, many}) => ({
+	enrollments: many(enrollments),
+	assignmentUploadLogs: many(assignmentUploadLogs),
+	user: one(users, {
+		fields: [students.userId],
+		references: [users.id]
+	}),
+	studentAssignments: many(studentAssignments),
+}));
+
+export const universitiesRelations = relations(universities, ({many}) => ({
+	enrollments: many(enrollments),
+	colleges: many(colleges),
+	departments: many(departments),
+}));
+
 export const teachersRelations = relations(teachers, ({one, many}) => ({
-	courses: many(courses),
 	user: one(users, {
 		fields: [teachers.userId],
 		references: [users.id]
 	}),
-	teacherDepartments: many(teacherDepartments),
 	teacherSubjects: many(teacherSubjects),
+	teacherColleges: many(teacherColleges),
+	teacherDepartments: many(teacherDepartments),
 }));
 
 export const assignmentUploadLogsRelations = relations(assignmentUploadLogs, ({one}) => ({
@@ -63,53 +147,43 @@ export const assignmentsRelations = relations(assignments, ({one, many}) => ({
 		fields: [assignments.assignedBy],
 		references: [users.id]
 	}),
-	semester: one(semesters, {
-		fields: [assignments.semesterId],
-		references: [semesters.id]
-	}),
-	subject: one(subjects, {
-		fields: [assignments.subjectCode],
-		references: [subjects.code]
+	collegeCourseSubject: one(collegeCourseSubjects, {
+		fields: [assignments.collegeCourseSubjectId],
+		references: [collegeCourseSubjects.id]
 	}),
 	studentAssignments: many(studentAssignments),
 }));
 
-export const studentsRelations = relations(students, ({one, many}) => ({
-	assignmentUploadLogs: many(assignmentUploadLogs),
-	semester: one(semesters, {
-		fields: [students.semesterId],
-		references: [semesters.id]
-	}),
-	user: one(users, {
-		fields: [students.userId],
-		references: [users.id]
-	}),
-	studentAssignments: many(studentAssignments),
-}));
-
-export const semestersRelations = relations(semesters, ({one, many}) => ({
-	students: many(students),
-	assignments: many(assignments),
-	course: one(courses, {
-		fields: [semesters.courseId],
-		references: [courses.id]
-	}),
-	subjects: many(subjects),
-}));
-
-export const subjectsRelations = relations(subjects, ({one, many}) => ({
-	assignments: many(assignments),
-	teacherSubjects: many(teacherSubjects),
-	semester: one(semesters, {
-		fields: [subjects.courseId],
-		references: [semesters.id]
-	}),
+export const subjectsRelations = relations(subjects, ({many}) => ({
+	courseSubjects: many(courseSubjects),
 }));
 
 export const otpSessionsRelations = relations(otpSessions, ({one}) => ({
 	user: one(users, {
 		fields: [otpSessions.userId],
 		references: [users.id]
+	}),
+}));
+
+export const teacherSubjectsRelations = relations(teacherSubjects, ({one}) => ({
+	collegeCourseSubject: one(collegeCourseSubjects, {
+		fields: [teacherSubjects.collegeCourseSubjectId],
+		references: [collegeCourseSubjects.id]
+	}),
+	teacher: one(teachers, {
+		fields: [teacherSubjects.teacherId],
+		references: [teachers.userId]
+	}),
+}));
+
+export const teacherCollegesRelations = relations(teacherColleges, ({one}) => ({
+	college: one(colleges, {
+		fields: [teacherColleges.collegeId],
+		references: [colleges.id]
+	}),
+	teacher: one(teachers, {
+		fields: [teacherColleges.teacherId],
+		references: [teachers.userId]
 	}),
 }));
 
@@ -146,17 +220,6 @@ export const teacherDepartmentsRelations = relations(teacherDepartments, ({one})
 	}),
 	teacher: one(teachers, {
 		fields: [teacherDepartments.teacherId],
-		references: [teachers.userId]
-	}),
-}));
-
-export const teacherSubjectsRelations = relations(teacherSubjects, ({one}) => ({
-	subject: one(subjects, {
-		fields: [teacherSubjects.subjectCode],
-		references: [subjects.code]
-	}),
-	teacher: one(teachers, {
-		fields: [teacherSubjects.teacherId],
 		references: [teachers.userId]
 	}),
 }));

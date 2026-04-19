@@ -1,4 +1,4 @@
-import { pgTable, check, serial, text, foreignKey, unique, uuid, timestamp, smallint, bigint, date, inet, primaryKey, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, foreignKey, uuid, text, smallint, timestamp, inet, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { users } from "./user";
 
@@ -22,11 +22,10 @@ export const otpSessions = pgTable("otp_sessions", {
 	userAgent: text("user_agent"),
 }, (table) => [
 	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "otp_sessions_user_id_fkey"
-		}),
+		columns: [table.userId],
+		foreignColumns: [users.id],
+		name: "otp_sessions_user_id_fkey"
+	}),
 	check("otp_sessions_purpose_check", sql`purpose = ANY (ARRAY['email_verification'::text, 'password_reset'::text, 'email_change'::text])`),
 	check("otp_sessions_status_check", sql`status = ANY (ARRAY['pending'::text, 'used'::text, 'expired'::text])`),
 ]);
-

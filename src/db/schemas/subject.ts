@@ -1,24 +1,11 @@
-import { 
-	pgTable, 
-	foreignKey, 
-	text, 
-	uuid, 
-	smallint, 
-	primaryKey 
-} from "drizzle-orm/pg-core";
-import { semesters } from "./semester";
+import { pgTable, uuid, text, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const subjects = pgTable("subjects", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
 	code: text().notNull(),
 	name: text().notNull(),
-	courseId: uuid("course_id").notNull(),
-	semesterId: smallint("semester_id").notNull(),
+	scope: text().default('university').notNull(),
 }, (table) => [
-	foreignKey({
-			columns: [table.courseId, table.semesterId],
-			foreignColumns: [semesters.id, semesters.courseId],
-			name: "subjects_semester_id_course_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-	primaryKey({ columns: [table.code, table.name], name: "subjects_pkey"}),
+	check("subjects_scope_check", sql`scope = ANY (ARRAY['university'::text, 'college'::text])`),
 ]);
-

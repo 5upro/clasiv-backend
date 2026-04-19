@@ -1,9 +1,4 @@
-import { 
-	pgTable, 
-	text, 
-	smallint, 
-	check 
-} from "drizzle-orm/pg-core";
+import { pgTable, smallint, text, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const roles = pgTable("roles", {

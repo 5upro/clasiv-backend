@@ -1,9 +1,4 @@
-import { 
-	pgTable, 
-	check, 
-	serial, 
-	text 
-} from "drizzle-orm/pg-core";
+import { pgTable, serial, text, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const permissions = pgTable("permissions", {
