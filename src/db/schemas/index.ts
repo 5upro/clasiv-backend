@@ -1,3 +1,5 @@
+export * from "./activationSession";
+export * from "./activationStatus";
 export * from "./assignment";
 export * from "./assignmentUploadLog";
 export * from "./college";
@@ -9,6 +11,7 @@ export * from "./department";
 export * from "./enrollment";
 export * from "./otpSession";
 export * from "./permission";
+export * from "./refreshToken";
 export * from "./role";
 export * from "./roleExtendedUser";
 export * from "./rolePermission";
