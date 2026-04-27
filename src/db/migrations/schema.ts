@@ -1,6 +1,7 @@
-import { pgTable, foreignKey, unique, uuid, boolean, check, text, serial, timestamp, smallint, bigint, date, inet, primaryKey, integer } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, unique, uuid, boolean, check, text, timestamp, serial, smallint, bigint, date, inet, primaryKey, integer, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
+export const activationStatus = pgEnum("activation_status", ['initiated', 'otp_sent', 'otp_verified', 'completed', 'expired'])
 
 
 export const collegeCourseSubjects = pgTable("college_course_subjects", {
@@ -29,6 +30,45 @@ export const subjects = pgTable("subjects", {
 	scope: text().default('university').notNull(),
 }, (table) => [
 	check("subjects_scope_check", sql`scope = ANY (ARRAY['university'::text, 'college'::text])`),
+]);
+
+export const activationSessions = pgTable("activation_sessions", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	otpSessionId: uuid("otp_session_id"),
+	status: activationStatus().default('initiated').notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).default(sql`(now() + '00:30:00'::interval)`).notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.otpSessionId],
+			foreignColumns: [otpSessions.id],
+			name: "activation_sessions_otp_session_id_fkey"
+		}).onUpdate("cascade").onDelete("set null"),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "activation_sessions_user_id_fkey"
+		}).onUpdate("cascade").onDelete("restrict"),
+]);
+
+export const refreshTokens = pgTable("refresh_tokens", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	tokenHash: text("token_hash").notNull(),
+	isRevoked: boolean("is_revoked").default(false).notNull(),
+	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "refresh_tokens_user_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
 ]);
 
 export const permissions = pgTable("permissions", {

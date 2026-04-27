@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { colleges, collegeCourseSubjects, courseSubjects, roles, users, departments, courses, collegeCourses, enrollments, students, universities, teachers, assignments, assignmentUploadLogs, subjects, otpSessions, teacherSubjects, teacherColleges, permissions, rolePermissions, roleExtendedUsers, teacherDepartments, studentAssignments } from "./schema";
+import { colleges, collegeCourseSubjects, courseSubjects, otpSessions, activationSessions, users, refreshTokens, roles, departments, courses, collegeCourses, enrollments, students, universities, teachers, assignments, assignmentUploadLogs, subjects, teacherSubjects, teacherColleges, permissions, rolePermissions, roleExtendedUsers, teacherDepartments, studentAssignments } from "./schema";
 
 export const collegeCourseSubjectsRelations = relations(collegeCourseSubjects, ({one, many}) => ({
 	college: one(colleges, {
@@ -36,7 +36,28 @@ export const courseSubjectsRelations = relations(courseSubjects, ({one, many}) =
 	}),
 }));
 
+export const activationSessionsRelations = relations(activationSessions, ({one}) => ({
+	otpSession: one(otpSessions, {
+		fields: [activationSessions.otpSessionId],
+		references: [otpSessions.id]
+	}),
+	user: one(users, {
+		fields: [activationSessions.userId],
+		references: [users.id]
+	}),
+}));
+
+export const otpSessionsRelations = relations(otpSessions, ({one, many}) => ({
+	activationSessions: many(activationSessions),
+	user: one(users, {
+		fields: [otpSessions.userId],
+		references: [users.id]
+	}),
+}));
+
 export const usersRelations = relations(users, ({one, many}) => ({
+	activationSessions: many(activationSessions),
+	refreshTokens: many(refreshTokens),
 	role: one(roles, {
 		fields: [users.baseRole],
 		references: [roles.id]
@@ -46,6 +67,13 @@ export const usersRelations = relations(users, ({one, many}) => ({
 	assignments: many(assignments),
 	otpSessions: many(otpSessions),
 	roleExtendedUsers: many(roleExtendedUsers),
+}));
+
+export const refreshTokensRelations = relations(refreshTokens, ({one}) => ({
+	user: one(users, {
+		fields: [refreshTokens.userId],
+		references: [users.id]
+	}),
 }));
 
 export const rolesRelations = relations(roles, ({many}) => ({
@@ -156,13 +184,6 @@ export const assignmentsRelations = relations(assignments, ({one, many}) => ({
 
 export const subjectsRelations = relations(subjects, ({many}) => ({
 	courseSubjects: many(courseSubjects),
-}));
-
-export const otpSessionsRelations = relations(otpSessions, ({one}) => ({
-	user: one(users, {
-		fields: [otpSessions.userId],
-		references: [users.id]
-	}),
 }));
 
 export const teacherSubjectsRelations = relations(teacherSubjects, ({one}) => ({
