@@ -1,51 +1,51 @@
 import { z } from "zod";
 
-export const OtpPurposeEnum = z.enum(["activate", "login"]);
+export const OtpPurposeEnum = z.enum(['email_verification', 'password_reset', 'email_change']);
+export const OtpStatusEnum = z.enum(['pending', 'used', 'expired']);
 
-export const OtpSessionSchema = z.object({
+const OtpSessionSchema = z.object({
 	id: z.string().uuid(),
-	user_id: z.string().uuid(),
-	email_id: z.string().email(),
+	userId: z.string().uuid(),
+	emailId: z.string().email(),
 	purpose: OtpPurposeEnum,
-	otp_hash: z.string(),
-	status: z.enum(["pending", "used", "expired"]).default("pending"),
-	otp_attempts: z.number().int().nonnegative(),
-	max_otp_attempts: z.number().int().positive().default(5),
-	resend_count: z.number().int().nonnegative(),
-	max_resend: z.number().int().positive().default(3),
-	change_email_count: z.number().int().nonnegative(),
-	max_email_change: z.number().int().positive().default(3),
-	created_at: z.coerce.date(),
-	updated_at: z.coerce.date(),
-	expires_at: z.coerce.date(),
-	ip: z.string().nullable().optional(),
-	user_agent: z.string().nullable().optional(),
+	otpHash: z.string(),
+	status: OtpStatusEnum.default('pending'),
+	otpAttempts: z.number().default(0),
+	maxOtpAttempts: z.number().default(5),
+	resendCount: z.number().default(0),
+	maxResend: z.number().default(3),
+	changeEmailCount: z.number().default(0),
+	maxEmailChange: z.number().default(3),
+	createdAt: z.string().nullable(),
+	updatedAt: z.string().nullable(),
+	expiresAt: z.string().nullable(),
+	ip: z.string().nullable(),
+	userAgent: z.string().nullable(),
 });
 
-export const OtpSessionWithUserSchema = OtpSessionSchema.extend({
-    users: z.object({
-        full_name: z.string(),
-    }),
-});
-
-export const CreateOtpSessionSchema = z.object({
-	user_id: z.string().uuid(),
-	email_id: z.string().email(),
-	value: z.string(),
-	type: OtpPurposeEnum,
-});
-
-export const UpdateOtpSessionSchema = OtpSessionSchema.omit({
-	id: true,
-	user_id: true,
+export const CreateOtpSessionSchema = OtpSessionSchema.pick({
+	userId: true,
+	emailId: true,
 	purpose: true,
-	max_otp_attempts: true,
-	max_resend: true,
-	max_email_change: true,
-	created_at: true,
+	otpHash: true,
 	ip: true,
-	user_agent: true
+	userAgent: true,
+});
+
+export const UpdateOtpSessionSchema = OtpSessionSchema.pick({
+    otpHash: true,
+	status: true,
+	emailId: true,
+	otpAttempts: true,
+	resendCount: true,
+	changeEmailCount: true,
+	updatedAt: true,
+	expiresAt: true,
 }).partial();
+
+export const DeleteOtpSessionSchema = OtpSessionSchema.pick({
+	id: true,
+});
 
 export const OtpVerifyPayloadSchema = z.object({
 	session_id: z.string().uuid(),
@@ -59,12 +59,12 @@ export const OtpResendPayloadSchema = z.object({
 export const OtpChangeEmailPayloadSchema = z.object({
 	session_id: z.string().uuid(),
 	email_id: z.string().email().toLowerCase(),
-})
+});
 
 export type OtpSession				= z.infer<typeof OtpSessionSchema>;
-export type OtpSessionWithUser		= z.infer<typeof OtpSessionWithUserSchema>;
 export type CreateOtpSession		= z.infer<typeof CreateOtpSessionSchema>;
 export type UpdateOtpSession		= z.infer<typeof UpdateOtpSessionSchema>;
+export type DeleteOtpSession		= z.infer<typeof DeleteOtpSessionSchema>;
 export type OtpVerifyPayload		= z.infer<typeof OtpVerifyPayloadSchema>;
 export type OtpResendPayload		= z.infer<typeof OtpResendPayloadSchema>;
 export type OtpChangeEmailPayload	= z.infer<typeof OtpChangeEmailPayloadSchema>;

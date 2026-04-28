@@ -2,42 +2,114 @@ import { Router } from "express";
 import validator from "@/middleware/global.validator";
 import * as authController from "@/modules/auth/auth.controller";
 import { 
-	ActivationSchema,
-    ActivateVerificationSchema,  
+	ActivationInitiateSchema, 
+    ActivationCompleteSchema, 
+    ActivationOtpSendSchema,
+    ActivationOtpVerifySchema,
+    ActivationOtpResendSchema,
+    ActivationOtpChangeEmailSchema,
 	LoginSchema, 
 } from "@/types/auth";
-import {
-    OtpVerifyPayloadSchema,
-    OtpResendPayloadSchema,
-    OtpChangeEmailPayloadSchema,
-} from "@/types/otp";
 
 const router = Router();
 
-router.post("/activate", 
-	validator(ActivationSchema),
-	authController.activate
+/* Activation Routes, these routes manages the whole activation process/flow
+* Initiate -> Sumbit New Data -> Verify Email -> Complete
+*
+* ROUTE: POST /auth/activation/initiate
+* BODY: 
+* {
+*     userName: string,
+*     password: string
+* }
+*/
+router.post("/activation/initiate", 
+	validator(ActivationInitiateSchema),
+	authController.activationInitiate
 );
-router.post("/activate/verification", 
-    validator(ActivateVerificationSchema),
-    authController.activateVerification
+
+/* ROUTE: POST /auth/activation/otp
+* BODY: 
+* {
+*     activationSessionId: string,
+*     emailId: string
+* }
+*/
+router.post("/activation/otp", 
+    validator(ActivationOtpSendSchema),
+    authController.activationOtpSend
 );
+
+/* ROUTE: POST /auth/activation/otp/verify
+* BODY: 
+* {
+*     activationSessionId: string,
+*     otp: string
+* }
+*/
+router.post("/activation/otp/verify", 
+    validator(ActivationOtpVerifySchema),
+    authController.activationOtpVerify
+);
+
+/* 
+* ROUTE: POST /auth/activation/otp/resend
+* BODY: 
+* {
+*     activationSessionId: string
+* }
+*/ 
+router.post("/activation/otp/resend", 
+    validator(ActivationOtpResendSchema),
+    authController.activationOtpResend
+);
+
+/* ROUTE: POST /auth/activation/otp/change-email
+* BODY: 
+* {
+*     activationSessionId: string,
+*     newEmailId: string
+* }
+*/
+router.post("/activation/otp/change-email", 
+    validator(ActivationOtpChangeEmailSchema),
+    authController.activationOtpChangeEmail
+);
+
+/* ROUTE: POST /auth/activation/complete
+* BODY: 
+* {
+*     activationSessionId: string,
+*     userName: string | null,
+*     phoneNo: string | null,
+*     emailId: string,
+*     password: string
+* }
+*/
+router.post("/activation/complete", 
+    validator(ActivationCompleteSchema),
+    authController.activationComplete
+);
+
+/* ROUTE: POST /auth/login
+* BODY: 
+* {
+*     userName: string | null, [if null, emailId is required]
+*     emailId: string | null, [if null, userName is required]
+*     password: string
+* }
+*/
 router.post("/login", 
     validator(LoginSchema),
 	authController.login
 );
-router.post("/otp/verification", 
-    validator(OtpVerifyPayloadSchema),
-	authController.otpVerification
-);
-router.post("/otp/resend",
-    validator(OtpResendPayloadSchema),
-	authController.resendOtp
-);
-router.post("/otp/change-email",
-    validator(OtpChangeEmailPayloadSchema),
-	authController.changeEmail
-);
+
+/* ROUTE: POST /auth/refresh
+* BODY: 
+* {
+*     refreshToken: string
+* }
+*/
 router.post("/refresh", 
 	authController.refreshTokens
 );

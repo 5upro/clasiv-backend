@@ -1,7 +1,8 @@
 import { 
 	generateRefreshToken,
 	verifyRefreshToken,
-	generateAccessToken
+	generateAccessToken,
+    hashToken
 } from "@/utils/token";
 import * as authRepository from "@/modules/auth/auth.repository";
 import { 
@@ -9,161 +10,120 @@ import {
 	hashOtp, 
 	verifyOTP 
 } from "@/utils/otp";
+import { 
+	hashPassword, 
+	verifyPassword 
+} from "@/utils/password";
 import { sendEmail } from "@/utils/email";
+import * as mapper from "@/mappers/users";
 import type { 
-    ActivationPayload, 
-	ActivateVerificationPayload, 
+    ActivationInitiatePayload,
+	ActivationOtpSendPayload,
+    ActivationOtpChangeEmailPayload,
+    ActivationOtpResendPayload,
+    ActivationOtpVerifyPayload,
+    ActivationCompletePayload,
     LoginPayload,
 } from "@/types/auth";
-import type {
-    OtpVerifyPayload,
-    OtpResendPayload,
-    OtpChangeEmailPayload
-} from "@/types/otp";
-import { updateUser } from "../users/users.service";
 
-export const activate = async (activateData: ActivationPayload) => {
-	const { data: user, error: userErr } = await authRepository.getUserByUserName(activateData.user_name);
-	if(userErr) throw new Error(userErr.message);
+export const activationInitiate = async (activationData: ActivationInitiatePayload) => {
+	const user = await authRepository.getUserByUserName(activationData.userName);
 	if(!user) throw new Error("User not found");
-	if(user.email_id) throw new Error("User is already activated");
+	if(user.activatedAt) throw new Error("User is already activated");
+
+	if(!user.passwordHash) throw new Error("User has no password set");
+	const isValidPassword = await verifyPassword(activationData.password, user.passwordHash);
+    if(!isValidPassword) throw new Error("Invalid password");
+
+    const activationSession = await authRepository.createActivationSession(user.id);
+    if(!activationSession) throw new Error("Failed to create Activation Session");
 
 	return {
-		full_name: user.full_name
-	};
+        user: mapper.cleanUserBase(user),
+		activationSessionId: activationSession.id
+    }
 }
 
-export const activateVerification = async (activateData: ActivateVerificationPayload) => {
-    const { data: user, error: userErr } = await authRepository.getUserByUserName(activateData.user_name);
-    if(userErr) throw new Error(userErr.message);
-    if(!user) throw new Error("User not found");
-    if(!user.email_id) throw new Error("User is not activated");
-
-	const { data: updatedUser, error: updatedUserErr } = await updateUser(user.id, {
-		user_name: activateData.user_name,
-        email_id: activateData.email_id,
-		phone_no: activateData.phone_no,
-		password: activateData.password
-	});
-    if(updatedUserErr) throw new Error(updatedUserErr.message);
-    if(!updatedUser) throw new Error("User not found");
-
+export const activationOtpSend = async (activationData: ActivationOtpSendPayload) => {
+    const activationSession = await authRepository.getActivationSession(activationData.activationSessionId);
+    if(!activationSession) throw new Error("Activation Session not found");
+	
     const otp = generateOtp();
     const otpHash = hashOtp(otp);
 
-    const { data: otpSession, error: otpErr } = await authRepository.setOtpStatus({
-        user_id: updatedUser.id,
-        email_id: updatedUser.email_id,
-        value: otpHash,
-        type: "activate"
+    const otpSession = await authRepository.createOtpSession({
+        userId: activationSession.userId,
+        emailId: activationData.emailId,
+        purpose: "email_verification",
+        otpHash: otpHash,
+        ip: null,
+        userAgent: null
     });
-    if(otpErr) throw new Error(otpErr.message);
-    if(!otpSession) throw new Error("User not found");
+    if(!otpSession) throw new Error("Failed to create OTP Session");
 
-    await sendEmail(
-		updatedUser.full_name, 
-		updatedUser.email_id, 
-		otp
-	);
-	return {
-        session_id: otpSession.id
-    };
+    await authRepository.updateActivationSession(activationSession.id, {
+		status: "otp_sent",
+        otpSessionId: otpSession.id,
+    });
+
+    await sendEmail(activationSession.userFullName, activationData.emailId, otp);
 }
 
-export const login = async (loginData: LoginPayload) => {
-	const { data: user, error: userErr } =
-		"user_name" in loginData
-			? await authRepository.getUserByUserName(loginData.user_name)
-			: await authRepository.getUserByEmail(loginData.email_id);
+export const activationOtpVerify = async (activationData: ActivationOtpVerifyPayload) => {
+	const activationSession = await authRepository.getActivationSession(activationData.activationSessionId);
+    if(!activationSession) throw new Error("Activation Session not found");
 
-	if(userErr) throw new Error(userErr.message);
-	if(!user) throw new Error("User not found");
-	if(!user.email_id) throw new Error("User is not activated");
-
-	const refresh_token = generateRefreshToken({ 
-		id: user.id 
-	});
-	const access_token = generateAccessToken({
-		id: user.id,
-		role: user.base_role,
-		extended_roles: user.extended_roles
-	});
-
-	return {
-		user,
-		tokens: {
-			access_token,
-			refresh_token
-		}
-	};
-};
-
-export const otpVerification = async (otpData: OtpVerifyPayload) => {
-	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
+	const data = await authRepository.getOtpSession(activationSession.otpSessionId!);
+	if(!data) throw new Error("OTP Session not found");
+	const { otp_sessions: otpSession } = data;
 	const now = new Date();
 
-	if(otpErr) throw new Error(otpErr.message);
-	if(!otpSession) throw new Error("User not found");
-	if(otpSession.otp_attempts === otpSession.max_otp_attempts){
-		await authRepository.updateOtpStatus(otpSession.id, {
+	if(otpSession.status === "used") throw new Error("OTP already sent");
+	if(otpSession.status === "expired") throw new Error("OTP expired");
+	if(otpSession.otpAttempts === otpSession.maxOtpAttempts){
+		await authRepository.updateOtpSession(otpSession.id, {
 			status: "expired"
 		})
 		throw new Error("OTP attempt limit exceeded");
 	}
-	const expiresAt = new Date(otpSession.expires_at);
+	const expiresAt = new Date(otpSession.expiresAt!);
 	if(now.getTime() >= expiresAt.getTime()){
-		await authRepository.updateOtpStatus(otpSession.id, {
+		await authRepository.updateOtpSession(otpSession.id, {
 			status: "expired"
 		});
 		throw new Error("OTP expired");
 	}
 
-	const isValid = verifyOTP(otpData.value, otpSession.otp_hash);
+	const isValid = verifyOTP(activationData.otp, otpSession.otpHash);
 	if(!isValid){
-		await authRepository.updateOtpStatus(otpSession.id, {
-			otp_attempts: otpSession.otp_attempts + 1, 
+		await authRepository.updateOtpSession(otpSession.id, {
+			otpAttempts: (otpSession.otpAttempts! + 1), 
 		});
 		throw new Error("Invalid OTP");
 	}
 
-	await authRepository.updateOtpStatus(otpSession.id, {
-		otp_attempts: otpSession.otp_attempts + 1, 
+	await authRepository.updateOtpSession(otpSession.id, {
+		otpAttempts: (otpSession.otpAttempts! + 1), 
 		status: "used"
 	});
 
-	const actionUser = otpSession.purpose === "register"
-		? authRepository.registerUser(otpSession.user_id, otpSession.email_id)
-		: authRepository.loginUser(otpSession.user_id);
-	const { data: user, error: userErr } = await actionUser;
-
-	if(userErr) throw new Error(userErr.message);
-	if(!user) throw new Error("User not found");
-	
-	const refresh_token = generateRefreshToken({ 
-		id: user.id 
-	});
-	const access_token = generateAccessToken({
-		id: user.id,
-		role: user.base_role,
-		extended_roles: user.extended_roles
-	});
-
-	return {
-		user, 
-		tokens: {
-			access_token, 
-			refresh_token
-		}
-	};
+    await authRepository.updateActivationSession(activationSession.id, {
+        status: "otp_verified",
+    });
 }
 
-export const resendOtp = async (otpData: OtpResendPayload) => {
-	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
+export const activationOtpResend = async (activationData: ActivationOtpResendPayload) => {
+	const activationSession = await authRepository.getActivationSession(activationData.activationSessionId);
+    if(!activationSession) throw new Error("Activation Session not found");
 
-	if(otpErr) throw new Error(otpErr.message);
-	if(!otpSession) throw new Error("User not found");
-	if(otpSession.resend_count === otpSession.max_resend){
-		await authRepository.updateOtpStatus(otpSession.id, {
+	const data = await authRepository.getOtpSession(activationSession.otpSessionId!);
+	if(!data) throw new Error("OTP Session not found");
+	const { otp_sessions: otpSession, users: user} = data;
+
+	if(otpSession.status === "used") throw new Error("OTP already sent");
+	if(otpSession.status === "expired") throw new Error("OTP expired");
+	if(otpSession.resendCount === otpSession.maxResend){
+		await authRepository.updateOtpSession(otpSession.id, {
 			status: "expired"
 		});
 		throw new Error("OTP resend limit exceeded");
@@ -172,28 +132,32 @@ export const resendOtp = async (otpData: OtpResendPayload) => {
 	const otp = generateOtp();
 	const otpHash = hashOtp(otp);
 
-	await authRepository.updateOtpStatus(otpSession.id, {
-		otp_hash: otpHash, 
-		resend_count: otpSession.resend_count + 1,
-		otp_attempts: 0,
-		updated_at: new Date(),
-		expires_at: new Date(Date.now() + 3 * 60 * 1000)
+	await authRepository.updateOtpSession(otpSession.id, {
+		otpHash: otpHash, 
+		resendCount: (otpSession.resendCount! + 1),
+		otpAttempts: 0,
+		expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString()
 	});
 
-	await sendEmail(otpSession.users.full_name, otpSession.email_id, otp);
+	await sendEmail(user.fullName, otpSession.emailId, otp);
 	return {
-		session_id: otpSession.id, 
-		full_name: otpSession.users.full_name
+		sessionId: otpSession.id, 
+		fullName: user.fullName
 	};
 }
 
-export const changeEmail = async (otpData: OtpChangeEmailPayload) => {
-	const { data: otpSession, error: otpErr } = await authRepository.getOtpStatus(otpData.session_id);
+export const activationOtpChangeEmail = async (activationData: ActivationOtpChangeEmailPayload) => {
+	const activationSession = await authRepository.getActivationSession(activationData.activationSessionId);
+    if(!activationSession) throw new Error("Activation Session not found");
 
-	if(otpErr) throw new Error(otpErr.message);
-	if(!otpSession) throw new Error("User not found");
-	if(otpSession.change_email_count === otpSession.max_email_change){
-		await authRepository.updateOtpStatus(otpSession.id, {
+	const data = await authRepository.getOtpSession(activationSession.otpSessionId!);
+	if(!data) throw new Error("OTP Session not found");
+	const { otp_sessions: otpSession, users: user}= data;
+
+	if(otpSession.status === "used") throw new Error("OTP already sent");
+	if(otpSession.status === "expired") throw new Error("OTP expired");
+	if(otpSession.changeEmailCount === otpSession.maxEmailChange){
+		await authRepository.updateOtpSession(otpSession.id, {
 			status: "expired"
 		});
 		throw new Error("Email change limit exceeded");
@@ -202,43 +166,133 @@ export const changeEmail = async (otpData: OtpChangeEmailPayload) => {
 	const otp = generateOtp();
 	const otpHash = hashOtp(otp);
 
-	await authRepository.updateOtpStatus(otpSession.id, {
-		email_id: otpData.email_id,
-		otp_hash: otpHash, 
-		change_email_count: otpSession.change_email_count + 1,
-		otp_attempts: 0,
-		resend_count: 0,
-		updated_at: new Date(),
-		expires_at: new Date(Date.now() + 3 * 60 * 1000)
+	await authRepository.updateOtpSession(otpSession.id, {
+		emailId: activationData.newEmailId,
+		otpHash: otpHash, 
+		changeEmailCount: (otpSession.changeEmailCount! + 1),
+		otpAttempts: 0,
+		resendCount: 0,
+		updatedAt: new Date().toISOString(),
+		expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString()
 	});
 
-	await sendEmail(otpSession.users.full_name, otpData.email_id, otp);
+	await sendEmail(user.fullName, activationData.newEmailId, otp);
 	return {
-		session_id: otpSession.id, 
-		full_name: otpSession.users.full_name
+		sessionId: otpSession.id, 
+		fullName: user.fullName
 	};
 }
+
+export const activationComplete = async (activationData: ActivationCompletePayload) => {
+	const activationSession = await authRepository.getActivationSession(activationData.activationSessionId);
+    if(!activationSession) throw new Error("Activation Session not found");
+    if(activationSession.status !== "otp_verified") throw new Error("Email not verified");
+
+	await authRepository.updateActivationSession(activationSession.id, {
+        status: "completed"    	
+	});
+
+	const passwordHash = await hashPassword(activationData.password);
+	const refreshToken = generateRefreshToken({ 
+		id: activationSession.userId
+	});
+	const refreshTokenHash = await hashToken(refreshToken);
+
+	const user = await authRepository.setupUser({
+		userId: activationSession.userId,
+        emailId: activationData.emailId,
+        passwordHash: passwordHash,
+        userName: activationData.userName,
+        phoneNo: activationData.phoneNo,
+		refreshTokenHash: refreshTokenHash
+	});
+    if(!user) throw new Error("User not found");
+
+	const accessToken = generateAccessToken({
+		id: user.id,
+		role: user.baseRole,
+		extendedRoles: user.extentionRoles,
+		permissions: user.permissions
+	});
+
+	return {
+		user: mapper.cleanUserProfile(user), 
+        tokens: {
+            accessToken,
+            refreshToken
+        }
+    };
+}
+
+export const login = async (loginData: LoginPayload) => {
+	const user =
+		loginData.userName
+		? await authRepository.getUserByUserName(loginData.userName)
+		: await authRepository.getUserByEmail(loginData.emailId!);
+
+	if(!user) throw new Error("User not found");
+	if(!user.emailId) throw new Error("User is not activated");
+
+	
+	if(!user.passwordHash) throw new Error("User has no password set");
+	const isValidPassword = await verifyPassword(loginData.password, user.passwordHash);
+    if(!isValidPassword) throw new Error("Invalid password");
+
+	const refreshToken = generateRefreshToken({ 
+		id: user.id 
+	});
+    const refreshTokenHash = await hashToken(refreshToken);
+
+	const updatedUser = await authRepository.loginUser({
+        userName: loginData.userName ?? null,
+        emailId: loginData.emailId ?? null,
+        refreshTokenHash: refreshTokenHash
+	});
+
+	const accessToken = generateAccessToken({
+		id: updatedUser.id,
+		role: updatedUser.baseRole,
+		extendedRoles: updatedUser.extentionRoles,
+		permissions: updatedUser.permissions
+	});
+
+	return {
+		user: mapper.cleanUserProfile(updatedUser),
+		tokens: {
+			accessToken,
+			refreshToken
+		}
+	};
+};
 
 export const refreshTokens = async (token: string) => {
 	const decode = verifyRefreshToken(token);
 
-	const { data: user, error } = await authRepository.getUserById(decode.id);
-	if(error) throw new Error(error.message);
+	const user = await authRepository.getUserProfile(decode.id);
 	if(!user) throw new Error("User not found");
 
-	const refresh_token = generateRefreshToken({ 
+	const refreshToken = generateRefreshToken({ 
 		id: user.id 
 	});
-	const access_token = generateAccessToken({
+    const refreshTokenHash = await hashToken(refreshToken);
+
+	await authRepository.updateRefreshToken(
+		user.id, 
+		refreshTokenHash
+	);
+
+	const accessToken = generateAccessToken({
 		id: user.id,
-		role: user.base_role,
-		extended_roles: user.extended_roles
+		role: user.baseRole,
+		extendedRoles: user.extentionRoles,
+		permissions: user.permissions
 	});
-	return { 
-		user, 
-		tokens: { 
-			access_token, 
-			refresh_token 
-		} 
+
+	return {
+		user: mapper.cleanUserProfile(user),
+		tokens: {
+			accessToken,
+			refreshToken
+		}
 	};
 }
