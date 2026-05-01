@@ -29,7 +29,25 @@ export const GetAssignmentPayloadSchema = z.object({
     id: z.string().uuid(),
 });
 
+export const CreateAssignmentSchema = z.object({
+	title: z.string().trim().min(1).max(255),
+	description: z.string().trim().optional(),
+	collegeCourseSubjectId: z.string().uuid(),
+	maxMarks: z.number().int().positive().optional(),
+	attachmentUrl: z.string().url().optional(),
+	dueAt: z.string().datetime(),
+	expiresAt: z.string().datetime(),
+}).refine(
+	(data) => new Date(data.expiresAt) > new Date(data.dueAt),
+	{
+		message: "expiresAt must be after dueAt",
+		path: ["expiresAt"],
+	}
+);
+
+
 export const AssignmentsSchema = z.array(AssignmentSchema);
 
 export type Assignment = z.infer<typeof AssignmentSchema>;
 export type Assignments = z.infer<typeof AssignmentsSchema>;
+export type CreateAssignmentPayload = z.infer<typeof CreateAssignmentSchema>;

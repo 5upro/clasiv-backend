@@ -4,6 +4,21 @@ import type {
 } from 'express';
 import * as assignmentService from "@/modules/assignments/assignments.service";
 
+export const createAssignment = async (req: Request, res: Response) => {
+    try {
+		const userId = req.user!.id;
+        const assignment = await assignmentService.createAssignment(userId, req.body);
+        res.status(201).json({
+            message: "Assignment created successfully!",
+            statusCode: 201,
+            assignment
+        });
+    } catch(error) {
+        if(error instanceof Error)
+            res.status(500).send(error.message);
+    }
+}
+
 export const getAssignments = async (req: Request, res: Response) => {
     try {
         const assignments = await assignmentService.getAssignments();

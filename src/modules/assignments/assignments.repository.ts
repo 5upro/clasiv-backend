@@ -4,8 +4,27 @@ import {
 	AssignmentsSchema,
 	type Assignments,
     AssignmentSchema,
-    type Assignment
+    type Assignment,
+    type CreateAssignmentPayload
 } from "@/types/assignments";
+
+export const createAssignment = async (userId: string, assignmentData: CreateAssignmentPayload): Promise<Assignment> => {
+    const result = await db.execute(sql`
+        SELECT create_assignment(
+			${userId}, 
+            ${assignmentData.collegeCourseSubjectId},
+            ${assignmentData.title},
+            ${assignmentData.dueAt},
+            ${assignmentData.expiresAt},
+            ${assignmentData.description},
+            ${assignmentData.maxMarks},
+            ${assignmentData.attachmentUrl}
+		)
+    `);
+
+    const raw = result.rows[0]?.create_assignment;
+    return AssignmentSchema.parse(raw);
+}
 
 export const getAssignments = async (): Promise<Assignments> => {
 	const result = await db.execute(sql`

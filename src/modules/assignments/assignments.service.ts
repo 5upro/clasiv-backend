@@ -1,4 +1,12 @@
 import * as assignmentsRepository from "@/modules/assignments/assignments.repository";
+import type { CreateAssignmentPayload } from "@/types/assignments";
+
+export const createAssignment = async (userId: string, assignmentData: CreateAssignmentPayload) => {
+    const assignment = await assignmentsRepository.createAssignment(userId, assignmentData);
+	if(!assignment) throw new Error("Failed to create assignment");
+
+    return assignment;
+}
 
 export const getAssignments = async () => {
     const assignments = await assignmentsRepository.getAssignments();
