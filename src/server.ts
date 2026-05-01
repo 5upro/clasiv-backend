@@ -10,6 +10,7 @@ import authRouter from "@/modules/auth/auth.routes";
 import driveRouter from "@/modules/drive/drive.routes";
 import rolesRouter from "@/modules/roles/roles.routes";
 import departmentsRouter from "@/modules/departments/departments.routes";
+import assignmentsRouter from "@/modules/assignments/assignments.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,7 @@ app.use("/auth", authRouter);
 app.use("/drive", driveRouter);
 app.use("/roles", rolesRouter);
 app.use("/departments", departmentsRouter);
+app.use("/assignments", assignmentsRouter);
 app.get("/health", (_req: Request, res: Response) => res.status(200).send("OK"));
 
 app.use((_req, res) => {
