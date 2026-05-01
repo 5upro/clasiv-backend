@@ -63,8 +63,8 @@ export const usersRelations = relations(users, ({one, many}) => ({
 		references: [roles.id]
 	}),
 	teachers: many(teachers),
-	students: many(students),
 	assignments: many(assignments),
+	students: many(students),
 	otpSessions: many(otpSessions),
 	roleExtendedUsers: many(roleExtendedUsers),
 }));

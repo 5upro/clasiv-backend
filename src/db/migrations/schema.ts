@@ -79,6 +79,15 @@ export const permissions = pgTable("permissions", {
 	check("permissions_action_check", sql`action = ANY (ARRAY['manage'::text, 'create'::text, 'update'::text, 'read'::text, 'delete'::text])`),
 ]);
 
+export const filePatternChunks = pgTable("file_pattern_chunks", {
+	id: smallint().primaryKey().generatedAlwaysAsIdentity({ name: "file_pattern_chunks_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 32767, cache: 1 }),
+	name: text().notNull(),
+	token: text().notNull(),
+}, (table) => [
+	unique("file_pattern_chunks_name_key").on(table.name),
+	unique("file_pattern_chunks_token_key").on(table.token),
+]);
+
 export const users = pgTable("users", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow(),
@@ -243,17 +252,6 @@ export const courseSubjects = pgTable("course_subjects", {
 	unique("course_subjects_course_id_subject_id_semester_key").on(table.courseId, table.subjectId, table.semester),
 ]);
 
-export const students = pgTable("students", {
-	userId: uuid("user_id").primaryKey().notNull(),
-	dob: date(),
-}, (table) => [
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "students_user_id_fkey"
-		}).onUpdate("cascade").onDelete("cascade"),
-]);
-
 export const assignments = pgTable("assignments", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	title: text().notNull(),
@@ -265,6 +263,7 @@ export const assignments = pgTable("assignments", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	dueAt: timestamp("due_at", { withTimezone: true, mode: 'string' }).notNull(),
 	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
+	filePattern: smallint("file_pattern").array().default([2]).notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.assignedBy],
@@ -276,6 +275,17 @@ export const assignments = pgTable("assignments", {
 			foreignColumns: [collegeCourseSubjects.id],
 			name: "assignments_college_course_subject_id_fkey"
 		}).onUpdate("cascade").onDelete("restrict"),
+]);
+
+export const students = pgTable("students", {
+	userId: uuid("user_id").primaryKey().notNull(),
+	dob: date(),
+}, (table) => [
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "students_user_id_fkey"
+		}).onUpdate("cascade").onDelete("cascade"),
 ]);
 
 export const otpSessions = pgTable("otp_sessions", {

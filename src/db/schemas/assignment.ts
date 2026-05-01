@@ -13,15 +13,17 @@ export const assignments = pgTable("assignments", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	dueAt: timestamp("due_at", { withTimezone: true, mode: 'string' }).notNull(),
 	expiresAt: timestamp("expires_at", { withTimezone: true, mode: 'string' }).notNull(),
+	filePattern: smallint("file_pattern").array().default([2]).notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.assignedBy],
-		foreignColumns: [users.id],
-		name: "assignments_assigned_by_fkey"
-	}),
+			columns: [table.assignedBy],
+			foreignColumns: [users.id],
+			name: "assignments_assigned_by_fkey"
+		}),
 	foreignKey({
-		columns: [table.collegeCourseSubjectId],
-		foreignColumns: [collegeCourseSubjects.id],
-		name: "assignments_college_course_subject_id_fkey"
-	}).onUpdate("cascade").onDelete("restrict"),
+			columns: [table.collegeCourseSubjectId],
+			foreignColumns: [collegeCourseSubjects.id],
+			name: "assignments_college_course_subject_id_fkey"
+		}).onUpdate("cascade").onDelete("restrict"),
 ]);
+
