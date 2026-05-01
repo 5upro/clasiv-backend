@@ -8,6 +8,7 @@ import type {
 } from "@/types/users";
 import type { RoleMap } from "@/types/roles";
 import type { DepartmentAbbrvMap } from "@/types/department";
+import * as mapper from "@/mappers/users";
 
 export const createUser = async (user: CreateUser) => {
 	const { data: roles, error: rolesErr } = await userRepository.getRoles();
@@ -53,7 +54,7 @@ export const getSelf = async (id: string) => {
 	const user = await userRepository.getUserProfile(id);
 	if(!user) throw new Error("User not found");
 
-    return user;
+    return mapper.cleanUserProfile(user);
 }
 
 export const updateSelf = async (id: string, user: UpdateSelf) => {
@@ -65,11 +66,10 @@ export const updateSelf = async (id: string, user: UpdateSelf) => {
 }
 
 export const getUser = async (id: string) => {
-    const { data: user, error: userErr } = await userRepository.getUserById(id);
-    if(userErr) throw new Error(userErr.message);
+    const user = await userRepository.getUserProfile(id);
     if(!user) throw new Error("User not found");
 
-    return user;
+    return mapper.cleanUserProfile(user);
 }
 
 export const updateUser = async (id: string, user: UpdateUser) => {
