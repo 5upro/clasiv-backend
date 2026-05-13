@@ -6,7 +6,9 @@ import {
     AssignmentSchema,
     type Assignment,
     type CreateAssignmentPayload, 
-	type AssignmentUploadLogPayload
+	type AssignmentUploadLogPayload,
+    type SubmissionKeyRPCResponse,
+    SubmissionKeyRPCSchema, 
 } from "@/types/assignments";
 import { assignmentUploadLogs } from "@/db/schemas";
 
@@ -25,12 +27,13 @@ export const createUploadLog = async (assgnmentData: AssignmentUploadLogPayload)
     return result[0] ?? null;
 }
 
-export const generateSubmissionKey = async (assignmentId: string, studentId: string): Promise<string> => {
+export const generateSubmissionKey = async (assignmentId: string, studentId: string): Promise<SubmissionKeyRPCResponse> => {
 	const result = await db.execute(sql`
 		SELECT generate_submission_key(${assignmentId}, ${studentId})
 	`);
 	const raw = result.rows[0]?.generate_submission_key;
-    return raw as string;
+	const parsed = SubmissionKeyRPCSchema.parse(raw);
+    return parsed;
 }
 
 export const createAssignment = async (userId: string, assignmentData: CreateAssignmentPayload): Promise<Assignment> => {

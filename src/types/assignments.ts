@@ -46,9 +46,15 @@ export const CreateAssignmentSchema = z.object({
 	}
 );
 
+export const SubmissionKeyRPCSchema = z.object({
+	success: z.boolean(),
+	error: z.string().nullable(),
+    key: z.string().nullable(),
+});
+
 export const UploadSubmissionSchema = z.object({
     fileSize: z.number().int().positive(),
-})
+});
 
 export const AssignmentUploadLogSchema = z.object({
 	assignmentId: z.string().uuid(),
@@ -61,4 +67,5 @@ export const AssignmentsSchema = z.array(AssignmentSchema);
 export type Assignment = z.infer<typeof AssignmentSchema>;
 export type Assignments = z.infer<typeof AssignmentsSchema>;
 export type CreateAssignmentPayload = z.infer<typeof CreateAssignmentSchema>;
+export type SubmissionKeyRPCResponse = z.infer<typeof SubmissionKeyRPCSchema>;
 export type AssignmentUploadLogPayload = z.infer<typeof AssignmentUploadLogSchema>;

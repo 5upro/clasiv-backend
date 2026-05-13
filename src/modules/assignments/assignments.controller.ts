@@ -1,10 +1,19 @@
 import type { 
 	Response, 
 	Request, 
+	NextFunction, 
 } from 'express';
 import * as assignmentService from "@/modules/assignments/assignments.service";
-
-export const createAssignment = async (req: Request, res: Response) => {
+/*
+* ROUTE: POST /assignments
+* BODY: 
+* {
+*     message: string,
+*     statusCode: number,
+*     assignment: <Assignment> [REFERENCE: @/types/assignments]
+* }
+*/
+export const createAssignment = async (req: Request, res: Response, next: NextFunction) => {
     try {
 		const userId = req.user!.id;
         const assignment = await assignmentService.createAssignment(userId, req.body);
@@ -14,12 +23,20 @@ export const createAssignment = async (req: Request, res: Response) => {
             assignment
         });
     } catch(error) {
-        if(error instanceof Error)
-            res.status(500).send(error.message);
+        next(error);
     }
 }
 
-export const getAssignments = async (req: Request, res: Response) => {
+/*
+* ROUTE: GET /assignments
+* BODY:
+* {
+*     message: string,
+*     statusCode: number,
+*     assignments: <Assignment[]> [REFERENCE: @/types/assignments]    
+* }
+*/
+export const getAssignments = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const assignments = await assignmentService.getAssignments();
         res.status(200).json({
@@ -28,12 +45,20 @@ export const getAssignments = async (req: Request, res: Response) => {
 			assignments
 		});
     } catch (error) {
-        if(error instanceof Error)
-            res.status(500).send(error.message);
+		next(error);
     }
 }
 
-export const getAssignment = async (req: Request<{ id: string }>, res: Response) => {
+/*
+* ROUTE: GET /assignments/:id
+* BODY:
+* {
+*     message: string,
+*     statusCode: number,
+*     assignment: <Assignment> [REFERENCE: @/types/assignments]    
+* }
+*/
+export const getAssignment = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     try {
         const assignment = await assignmentService.getAssignment(req.params.id);
         res.status(200).json({
@@ -42,12 +67,24 @@ export const getAssignment = async (req: Request<{ id: string }>, res: Response)
             assignment
         });
     } catch (error) {
-        if(error instanceof Error)
-            res.status(500).send(error.message);
+		next(error);
     }
 }
 
-export const createSubmission = async (req: Request<{ id: string }>, res: Response) => {
+/*
+* ROUTE: POST /assignments/:id/submissions
+* BODY: 
+* {
+*     message: string,
+*     statusCode: number,
+*     upload: {
+*         url: string
+*     },
+*     submissionLogId: string,
+*     expiresIn: number [in seconds]
+* }
+*/
+export const createSubmission = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
 	try {
 		const uploadCredentials = await assignmentService.createSubmission(
 			req.params.id, 
@@ -64,7 +101,6 @@ export const createSubmission = async (req: Request<{ id: string }>, res: Respon
 			expiresIn: 180
 		});
 	} catch (error) {
-		if(error instanceof Error)
-			res.status(500).send(error.message);
+        next(error);
 	}
 }
