@@ -226,14 +226,17 @@ export const activationComplete = async (activationData: ActivationCompletePaylo
 }
 
 export const login = async (loginData: LoginPayload) => {
+	const getUserStart = performance.now();
 	const user =
 		loginData.userName
 		? await authRepository.getUserByUserName(loginData.userName)
 		: await authRepository.getUserByEmail(loginData.emailId!);
 
+	const getUserEnd = performance.now();
+	console.log(`Time taken to Get user: ${getUserEnd - getUserStart} ms`);
+
 	if(!user) throw new Error("User not found");
 	if(!user.emailId) throw new Error("User is not activated");
-
 	
 	if(!user.passwordHash) throw new Error("User has no password set");
 	const isValidPassword = await verifyPassword(loginData.password, user.passwordHash);
@@ -244,18 +247,36 @@ export const login = async (loginData: LoginPayload) => {
 	});
     const refreshTokenHash = await hashToken(refreshToken);
 
+	const updateUserStart = performance.now();
 	const updatedUser = await authRepository.loginUser({
         userName: loginData.userName ?? null,
         emailId: loginData.emailId ?? null,
         refreshTokenHash: refreshTokenHash
 	});
 
+	const updateUserEnd = performance.now();
+	console.log(`Time taken to Update user: ${updateUserEnd - updateUserStart} ms`);
+
+	const getDemoUserStart = performance.now();
+	const demoUser =
+		loginData.userName
+		? await authRepository.getUserByUserName(loginData.userName)
+		: await authRepository.getUserByEmail(loginData.emailId!);
+
+	const getDemoUserEnd = performance.now();
+	console.log(`Time taken to Get Demo user: ${getDemoUserEnd - getDemoUserStart} ms`);
+
+	const createAccessTokenStart = performance.now();
 	const accessToken = generateAccessToken({
 		id: updatedUser.id,
 		role: updatedUser.baseRole,
 		extendedRoles: updatedUser.extentionRoles,
 		permissions: updatedUser.permissions
 	});
+
+    const createAccessTokenEnd = performance.now();
+    console.log(`Time taken to Create Access Token: ${createAccessTokenEnd - createAccessTokenStart} ms`);
+	console.log(".");
 
 	return {
 		user: mapper.cleanUserProfile(updatedUser),
