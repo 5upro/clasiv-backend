@@ -11,6 +11,7 @@ import driveRouter from "@/modules/drive/drive.routes";
 import rolesRouter from "@/modules/roles/roles.routes";
 import departmentsRouter from "@/modules/departments/departments.routes";
 import assignmentsRouter from "@/modules/assignments/assignments.routes";
+import { errorHandler } from "@/middleware/global.errorHandler";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,6 +39,8 @@ app.use((_req, res) => {
 		description: "Sorry, but the page you are looking for was not found."
 	});
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);

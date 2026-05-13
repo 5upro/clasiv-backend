@@ -1,4 +1,5 @@
 import type { 
+    NextFunction,
 	Request, 
 	Response 
 } from "express";
@@ -21,7 +22,7 @@ import * as authService from "@/modules/auth/auth.service";
 *     }
 * }
 */
-export const activationInitiate = async (req: Request, res: Response) => {
+export const activationInitiate = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { activationSessionId, user } = await authService.activationInitiate(req.body);
 		res.status(200).json({ 
@@ -31,10 +32,7 @@ export const activationInitiate = async (req: Request, res: Response) => {
             user
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+		next(error);
 	}
 }
 
@@ -45,7 +43,7 @@ export const activationInitiate = async (req: Request, res: Response) => {
 *     statusCode: number
 * }
 */
-export const activationOtpSend = async (req: Request, res: Response) => {
+export const activationOtpSend = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		await authService.activationOtpSend(req.body);
 		res.status(200).json({ 
@@ -53,10 +51,7 @@ export const activationOtpSend = async (req: Request, res: Response) => {
 			statusCode: 200
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+        next(error);
 	}
 }
 
@@ -67,7 +62,7 @@ export const activationOtpSend = async (req: Request, res: Response) => {
 *     statusCode: number
 * }
 */
-export const activationOtpVerify = async (req: Request, res: Response) => {
+export const activationOtpVerify = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		await authService.activationOtpVerify(req.body);
 		res.status(200).json({ 
@@ -75,10 +70,7 @@ export const activationOtpVerify = async (req: Request, res: Response) => {
             statusCode: 200
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+        next(error);
 	}
 }
 
@@ -90,7 +82,7 @@ export const activationOtpVerify = async (req: Request, res: Response) => {
 *     statusCode: number
 * }
 */ 
-export const activationOtpResend = async (req: Request, res: Response) => {
+export const activationOtpResend = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		await authService.activationOtpResend(req.body);
 		res.status(200).json({ 
@@ -98,10 +90,7 @@ export const activationOtpResend = async (req: Request, res: Response) => {
             statusCode: 200
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+        next(error);
 	}
 }
 
@@ -112,7 +101,7 @@ export const activationOtpResend = async (req: Request, res: Response) => {
 *     statusCode: number
 * }
 */
-export const activationOtpChangeEmail = async (req: Request, res: Response) => {
+export const activationOtpChangeEmail = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		await authService.activationOtpChangeEmail(req.body);
 		res.status(200).json({ 
@@ -120,10 +109,7 @@ export const activationOtpChangeEmail = async (req: Request, res: Response) => {
             statusCode: 200
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+        next(error);
 	}
 }
 
@@ -136,7 +122,7 @@ export const activationOtpChangeEmail = async (req: Request, res: Response) => {
 *     token: { accessToken: string, refreshToken: string }
 * }   
 */  
-export const activationComplete = async (req: Request, res: Response) => {
+export const activationComplete = async (req: Request, res: Response, next: NextFunction) => {
     try {  
         const { user, tokens } = await authService.activationComplete(req.body);
         res.status(200).json({   
@@ -146,10 +132,7 @@ export const activationComplete = async (req: Request, res: Response) => {
             tokens  
         }); 
     } catch (error) {
-        if (error instanceof Error) {
-            return res.status(400).json({ message: error.message });
-        }
-        return res.status(500).json({ message: "Unknown error" });
+		next(error);
     }
 }
 
@@ -162,7 +145,7 @@ export const activationComplete = async (req: Request, res: Response) => {
 *     token: { accessToken: string, refreshToken: string }
 * }   
 */  
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response, next: NextFunction) => {
 	try {  
 		const { user, tokens } = await authService.login(req.body);
 		res.status(200).json({   
@@ -172,10 +155,7 @@ export const login = async (req: Request, res: Response) => {
 			tokens  
 		}); 
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+		next(error);
 	}
 }
 
@@ -188,7 +168,7 @@ export const login = async (req: Request, res: Response) => {
 *     token: { accessToken: string, refreshToken: string }
 * }   
 */  
-export const refreshTokens = async (req: Request, res: Response) => {
+export const refreshTokens = async (req: Request, res: Response, next: NextFunction) => {
 	try {  
 		const { token }  = req.body;  
 		const { user, tokens } = await authService.refreshTokens(token);
@@ -199,9 +179,6 @@ export const refreshTokens = async (req: Request, res: Response) => {
 			tokens 
 		});
 	} catch (error) {
-		if (error instanceof Error) {
-			return res.status(400).json({ message: error.message });
-		}
-		return res.status(500).json({ message: "Unknown error" });
+		next(error);
 	}
 }
