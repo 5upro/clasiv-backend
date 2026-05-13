@@ -45,7 +45,7 @@ router.get("/:id",
 );
 
 /*
-* ROUTE: POST /assignments
+* ROUTE: POST /assignments/:id/submissions
 * BODY: 
 * {
 *     fileSize: number,
