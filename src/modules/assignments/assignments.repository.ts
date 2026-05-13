@@ -8,9 +8,10 @@ import {
     type CreateAssignmentPayload, 
 	type AssignmentUploadLogPayload,
     type SubmissionKeyRPCResponse,
-    SubmissionKeyRPCSchema, 
+    SubmissionKeyRPCSchema,
+    type FilePattern, 
 } from "@/types/assignments";
-import { assignmentUploadLogs } from "@/db/schemas";
+import { assignmentUploadLogs, filePatternChunks } from "@/db/schemas";
 
 export const createUploadLog = async (assgnmentData: AssignmentUploadLogPayload) => {
     const result = await db
@@ -27,6 +28,13 @@ export const createUploadLog = async (assgnmentData: AssignmentUploadLogPayload)
     return result[0] ?? null;
 }
 
+export const getFilePatterns = async (): Promise<FilePattern[]> => {
+    const result = await db.select({
+		id: filePatternChunks.id,
+        name: filePatternChunks.name
+	}).from(filePatternChunks);
+    return result;
+}
 export const generateSubmissionKey = async (assignmentId: string, studentId: string): Promise<SubmissionKeyRPCResponse> => {
 	const result = await db.execute(sql`
 		SELECT generate_submission_key(${assignmentId}, ${studentId})

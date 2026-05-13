@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const FilePatternSchema = z.object({
+	id: z.number(),
+    name: z.string(),
+});
+
 const AssignedBySchema = z.object({
 	userName: z.string().nullable(),
 	fullName: z.string(),
@@ -64,8 +69,9 @@ export const AssignmentUploadLogSchema = z.object({
 
 export const AssignmentsSchema = z.array(AssignmentSchema);
 
-export type Assignment = z.infer<typeof AssignmentSchema>;
-export type Assignments = z.infer<typeof AssignmentsSchema>;
-export type CreateAssignmentPayload = z.infer<typeof CreateAssignmentSchema>;
-export type SubmissionKeyRPCResponse = z.infer<typeof SubmissionKeyRPCSchema>;
-export type AssignmentUploadLogPayload = z.infer<typeof AssignmentUploadLogSchema>;
+export type FilePattern					= z.infer<typeof FilePatternSchema>;
+export type Assignment					= z.infer<typeof AssignmentSchema>;
+export type Assignments					= z.infer<typeof AssignmentsSchema>;
+export type CreateAssignmentPayload		= z.infer<typeof CreateAssignmentSchema>;
+export type SubmissionKeyRPCResponse	= z.infer<typeof SubmissionKeyRPCSchema>;
+export type AssignmentUploadLogPayload	= z.infer<typeof AssignmentUploadLogSchema>;

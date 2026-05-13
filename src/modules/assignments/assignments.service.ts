@@ -16,6 +16,13 @@ export const getAssignments = async () => {
     return assignments;
 }
 
+export const getFilePatterns = async () => {
+    const patterns = await assignmentRepository.getFilePatterns();
+	if(!patterns) throw new AppError("Failed to get file patterns", 500);
+
+    return patterns;
+}
+
 export const getAssignment = async (id: string) => {
     const assignment = await assignmentRepository.getAssignment(id);
 	if(!assignment) throw new AppError("Assignment not found", 404);

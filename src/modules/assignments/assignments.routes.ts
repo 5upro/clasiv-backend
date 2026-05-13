@@ -38,6 +38,13 @@ router.get("/",
 );
 
 /*
+* ROUTE: GET /assignments/file-pattern
+*/
+router.get("/file-patterns", 
+	assignmentController.getFilePatterns
+);
+
+/*
 * ROUTE: GET /assignments/:id
 */
 router.get("/:id", 

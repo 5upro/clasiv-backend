@@ -50,6 +50,28 @@ export const getAssignments = async (req: Request, res: Response, next: NextFunc
 }
 
 /*
+* ROUTE: GET /assignments/file-patterns
+* BODY:
+* {
+*     message: string,
+*     statusCode: number,
+*     filePatterns: <FilePattern[]> [REFERENCE: @/types/assignments>
+* }
+*/
+export const getFilePatterns = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+		const filePatterns = await assignmentService.getFilePatterns();
+    	res.status(200).json({
+            message: "File patterns found successfully!",
+            statusCode: 200,
+            filePatterns
+		});
+    } catch (error) {
+    	next(error);
+    }
+}
+
+/*
 * ROUTE: GET /assignments/:id
 * BODY:
 * {
