@@ -11,6 +11,7 @@ import * as authService from "@/modules/auth/auth.service";
 * BODY: 
 * {
 *     message: string,
+*     statusCode: number,
 *     activationSessionId: string,
 *     user: {
 *         fullName: string,
@@ -25,6 +26,7 @@ export const activationInitiate = async (req: Request, res: Response) => {
 		const { activationSessionId, user } = await authService.activationInitiate(req.body);
 		res.status(200).json({ 
 			message: "Account found!",
+			statusCode: 200,
 			activationSessionId,
             user
 		});
@@ -39,7 +41,8 @@ export const activationInitiate = async (req: Request, res: Response) => {
 /* ROUTE: POST /auth/activation/otp
 * BODY: 
 * {
-*     message: string
+*     message: string,
+*     statusCode: number
 * }
 */
 export const activationOtpSend = async (req: Request, res: Response) => {
@@ -47,6 +50,7 @@ export const activationOtpSend = async (req: Request, res: Response) => {
 		await authService.activationOtpSend(req.body);
 		res.status(200).json({ 
 			message: "OTP sent!",
+			statusCode: 200
 		});
 	} catch (error) {
 		if (error instanceof Error) {
@@ -59,7 +63,8 @@ export const activationOtpSend = async (req: Request, res: Response) => {
 /* ROUTE: POST /auth/activation/otp/verify
 * BODY: 
 * {
-*     message: string
+*     message: string,
+*     statusCode: number
 * }
 */
 export const activationOtpVerify = async (req: Request, res: Response) => {
@@ -67,6 +72,7 @@ export const activationOtpVerify = async (req: Request, res: Response) => {
 		await authService.activationOtpVerify(req.body);
 		res.status(200).json({ 
 			message: "Email verified successfully!",
+            statusCode: 200
 		});
 	} catch (error) {
 		if (error instanceof Error) {
@@ -80,7 +86,8 @@ export const activationOtpVerify = async (req: Request, res: Response) => {
 * ROUTE: POST /auth/activation/otp/resend
 * BODY: 
 * {
-*     message: string
+*     message: string,
+*     statusCode: number
 * }
 */ 
 export const activationOtpResend = async (req: Request, res: Response) => {
@@ -88,6 +95,7 @@ export const activationOtpResend = async (req: Request, res: Response) => {
 		await authService.activationOtpResend(req.body);
 		res.status(200).json({ 
 			message: "OTP resent!",
+            statusCode: 200
 		});
 	} catch (error) {
 		if (error instanceof Error) {
@@ -100,7 +108,8 @@ export const activationOtpResend = async (req: Request, res: Response) => {
 /* ROUTE: POST /auth/activation/otp/change-email
 * BODY: 
 * {
-*     message: string
+*     message: string,
+*     statusCode: number
 * }
 */
 export const activationOtpChangeEmail = async (req: Request, res: Response) => {
@@ -108,6 +117,7 @@ export const activationOtpChangeEmail = async (req: Request, res: Response) => {
 		await authService.activationOtpChangeEmail(req.body);
 		res.status(200).json({ 
 			message: "OTP resent to new email!",
+            statusCode: 200
 		});
 	} catch (error) {
 		if (error instanceof Error) {
@@ -121,6 +131,7 @@ export const activationOtpChangeEmail = async (req: Request, res: Response) => {
 * BODY: 
 * {
 *     message: string, 
+*     statusCode: number, 
 *     user: <UserProfile> [REFERENCE: @/types/users]  
 *     token: { accessToken: string, refreshToken: string }
 * }   
@@ -130,6 +141,7 @@ export const activationComplete = async (req: Request, res: Response) => {
         const { user, tokens } = await authService.activationComplete(req.body);
         res.status(200).json({   
             message: "Account activated successfully!", 
+            statusCode: 200,
             user,  
             tokens  
         }); 
@@ -145,6 +157,7 @@ export const activationComplete = async (req: Request, res: Response) => {
 * BODY: 
 * {
 *     message: string, 
+*     statusCode: number, 
 *     user: <UserProfile> [REFERENCE: @/types/users]  
 *     token: { accessToken: string, refreshToken: string }
 * }   
@@ -153,7 +166,8 @@ export const login = async (req: Request, res: Response) => {
 	try {  
 		const { user, tokens } = await authService.login(req.body);
 		res.status(200).json({   
-			message: "Login successful!",   
+			message: "Login successful!", 
+            statusCode: 200,
 			user,  
 			tokens  
 		}); 
@@ -169,6 +183,7 @@ export const login = async (req: Request, res: Response) => {
 * BODY: 
 * {
 *     message: string, 
+*     statusCode: number, 
 *     user: <UserProfile> [REFERENCE: @/types/users]  
 *     token: { accessToken: string, refreshToken: string }
 * }   
@@ -179,6 +194,7 @@ export const refreshTokens = async (req: Request, res: Response) => {
 		const { user, tokens } = await authService.refreshTokens(token);
 		res.status(200).json({  
 			message: "Token refreshed successfully!", 
+            statusCode: 200,
 			user,  
 			tokens 
 		});
