@@ -226,50 +226,35 @@ export const activationComplete = async (activationData: ActivationCompletePaylo
 }
 
 export const login = async (loginData: LoginPayload) => {
-	const getUserStart = performance.now();
 	const user =
 		loginData.userName
 		? await authRepository.getUserByUserName(loginData.userName)
 		: await authRepository.getUserByEmail(loginData.emailId!);
 
-	const getUserEnd = performance.now();
-	console.log(`Time taken to Get user: ${getUserEnd - getUserStart} ms`);
-
 	if(!user) throw new Error("User not found");
 	if(!user.emailId) throw new Error("User is not activated");
 	
 	if(!user.passwordHash) throw new Error("User has no password set");
-	const verifyStart = performance.now();
 	const isValidPassword = await verifyPassword(loginData.password, user.passwordHash);
-	console.log(`Time taken to verifyPassword: ${performance.now() - verifyStart}ms`);
     if(!isValidPassword) throw new Error("Invalid password");
 
 	const refreshToken = generateRefreshToken({ 
 		id: user.id 
 	});
-	const hashStart = performance.now();
     const refreshTokenHash = hashToken(refreshToken);
-    console.log(`Time taken to hashToken: ${performance.now() - hashStart}ms`);
 
-	const updateUserStart = performance.now();
 	const updatedUser = await authRepository.loginUser({
         userName: loginData.userName ?? null,
         emailId: loginData.emailId ?? null,
         refreshTokenHash: refreshTokenHash
 	});
 
-	const updateUserEnd = performance.now();
-	console.log(`Time taken to Update user: ${updateUserEnd - updateUserStart} ms`);
-
-	const createAccessTokenStart = performance.now();
 	const accessToken = generateAccessToken({
 		id: updatedUser.id,
 		role: updatedUser.baseRole,
 		extendedRoles: updatedUser.extentionRoles,
 		permissions: updatedUser.permissions
 	});
-    console.log(`Time taken to Create Access Token: ${performance.now() - createAccessTokenStart} ms`);
-	console.log(".");
 
 	return {
 		user: mapper.cleanUserProfile(updatedUser),
