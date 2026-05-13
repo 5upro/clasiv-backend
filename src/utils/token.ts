@@ -6,8 +6,7 @@ import jwt, {
 	JsonWebTokenError, 
 	TokenExpiredError, 
 } from "jsonwebtoken";
-export { hashPassword as hashToken } from "@/utils/password";
-export { verifyPassword as verifyToken } from "@/utils/password";
+import { createHash } from "crypto";
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET as string;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET as string;
@@ -15,6 +14,10 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET as string;
 if(!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET){
     throw new Error("Missing JWT credentials");
 }
+
+export const hashToken = (token: string): string => {
+    return createHash("sha256").update(token).digest("hex");
+};
 
 export const generateRefreshToken = (payload: RefreshTokenPayload) => {
     return jwt.sign(payload, REFRESH_TOKEN_SECRET, { 
@@ -27,6 +30,10 @@ export const generateAccessToken = (payload: AccessTokenPayload) => {
         expiresIn: "30m" 
 	});
 }
+
+export const verifyTokenHash = (token: string, hash: string): boolean => {
+    return createHash("sha256").update(token).digest("hex") === hash;
+};
 
 const verifyToken = <T>(token: string, secret: string) => {
 	try {
