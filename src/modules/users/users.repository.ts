@@ -1,9 +1,12 @@
-import type { 
-	User, 
-	CreateUser, 
-	UpdateUser, 
-    UpdateSelf,
-    BaseGetUser, 
+import { 
+	type User, 
+    type UserProfile, 
+	type CreateUser, 
+	type UpdateUser, 
+    type UpdateSelf,
+    type BaseGetUser,
+    UpdateSelfRPCSchema,
+    UpdateSelfRPCResponse,
 } from "@/types/users";
 import type {
     Role,
@@ -12,6 +15,8 @@ import type {
 import type { DepartmentAbbrvMap } from "@/types/department";
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase } from "@/config/supabase";
+import db from "@/config/db";
+import { sql } from "drizzle-orm";
 
 export { getUserById } from "@/db/queries/getUserById";
 export { getUserByUserName } from "@/db/queries/getUserByUserName";
@@ -37,14 +42,16 @@ export const getUsers = async (
 	});
 }
 
-export const updateSelf = async (
-	id: string, 
-	user: UpdateSelf
-): Promise<PostgrestSingleResponse<User>> => {
-    return await supabase.rpc("update_user_self", {
-        _user_id: id,
-        _email_id: user.email_id ?? null,
-        _phone_no: user.phone_no ?? null,
-		_dob: user.dob ?? null,
-    }).single();
+export const updateSelf = async (id: string, user: UpdateSelf): Promise<UpdateSelfRPCResponse> => {
+	const result = await db.execute(sql`
+		SELECT update_self(
+			${id},
+			${user.userName ?? null},
+			${user.emailId ?? null},
+			${user.phoneNo ?? null}
+		);
+	`);
+
+    const raw = result.rows[0]?.update_self;
+    return UpdateSelfRPCSchema.parse(raw);
 }

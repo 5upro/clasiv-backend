@@ -155,9 +155,17 @@ export const UpdateUserSchema = BaseCreateUserSchema.partial()
 );
 
 export const UpdateSelfSchema = z.object({
-    emailId: z.string().email().toLowerCase().optional(),
+	userName: z.string().trim().toLowerCase().min(2).max(32)
+		.regex(/^(?!\.)(?!.*\.\.)(?!.*\.$)(?=.*[a-zA-Z0-9])[a-zA-Z0-9_.]+$/)
+		.optional(),
+    emailId: z.string().toLowerCase().email().optional(),
     phoneNo: z.string().trim().length(10).regex(/^\d+$/).optional(),
-	dob: z.coerce.date().optional(),
+});
+
+export const UpdateSelfRPCSchema = z.object({
+    success: z.boolean(),
+    error: z.string().nullable(),
+    data: UserProfileSchema.nullable(),
 });
 
 export type UserProfile		= z.infer<typeof UserProfileSchema>;
@@ -173,3 +181,5 @@ export type BaseGetUser		= z.infer<typeof BaseGetUserSchema>;
 export type CreateUser		= z.infer<typeof CreateUserSchema>;
 export type UpdateUser		= z.infer<typeof UpdateUserSchema>;
 export type UpdateSelf		= z.infer<typeof UpdateSelfSchema>;
+
+export type UpdateSelfRPCResponse	= z.infer<typeof UpdateSelfRPCSchema>;

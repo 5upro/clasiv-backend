@@ -9,6 +9,7 @@ import type {
 import type { RoleMap } from "@/types/roles";
 import type { DepartmentAbbrvMap } from "@/types/department";
 import * as mapper from "@/mappers/users";
+import { AppError } from "src/utils/error";
 
 export const createUser = async (user: CreateUser) => {
 	return "Route Under Construction";
@@ -46,9 +47,11 @@ export const getSelf = async (id: string) => {
 }
 
 export const updateSelf = async (id: string, user: UpdateSelf) => {
-	const { data: updatedUser, error: userErr } = await userRepository.updateSelf(id, user);
-	if(userErr) throw new Error(userErr.message);
-	if(!updatedUser) throw new Error("User not found");
+	const { success, data: updatedUser, error } = await userRepository.updateSelf(id, user);
+	if(!success){
+		throw new AppError(error!, 409);
+	}
+	if(!updatedUser) throw new AppError("User not found", 500);
 
     return updatedUser;
 }
